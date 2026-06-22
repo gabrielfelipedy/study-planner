@@ -6,7 +6,7 @@ A personal web app that automatically creates study timetables based on deadline
 
 ## Phases
 
-- [ ] **Phase 1: Foundation & Data Model** - Project scaffold, Turso DB, Drizzle schema, DAL pattern, CI/CD
+- [x] **Phase 1: Foundation & Data Model** - Project scaffold, Turso DB, Drizzle schema, DAL pattern, CI/CD
 - [ ] **Phase 2: Authentication** - Sign up, login/logout, password reset, protected routes
 - [ ] **Phase 3: Subject & Topic Management** - Creat/edit subjects, topics, deadlines, available time input
 - [ ] **Phase 4: Timetable Engine & Schedule View** - Auto-generate daily schedule, manual adjustment, in-app schedule view
@@ -30,10 +30,10 @@ A personal web app that automatically creates study timetables based on deadline
 **Plans**: 4 plans (2 waves)
 
 Plans:
-- [ ] 01-01-PLAN.md — Project scaffold (Next.js 16, dependencies, Drizzle config, env templates)
-- [ ] 01-02-PLAN.md — Database schema & client (all 9 tables, local SQLite dev connection)
-- [ ] 01-03-PLAN.md — Data Access Layer skeleton (11 files across queries, commands, scheduler)
-- [ ] 01-04-PLAN.md — GitHub repository & CI/CD (git init, Actions workflow, push)
+- [x] 01-01-PLAN.md — Project scaffold (Next.js 16, dependencies, Drizzle config, env templates)
+- [x] 01-02-PLAN.md — Database schema & client (all 9 tables, local SQLite dev connection)
+- [x] 01-03-PLAN.md — Data Access Layer skeleton (11 files across queries, commands, scheduler)
+- [x] 01-04-PLAN.md — GitHub repository & CI/CD (git init, Actions workflow, push)
 
 ### Phase 2: Authentication
 **Goal**: Users can securely access their accounts with email/password
@@ -129,7 +129,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Data Model | 0/4 | Planning complete | - |
+| 1. Foundation & Data Model | 4/4 | ✓ Complete | 2026-06-22 |
 | 2. Authentication | 0/0 | Not started | - |
 | 3. Subject & Topic Management | 0/0 | Not started | - |
 | 4. Timetable Engine & Schedule View | 0/0 | Not started | - |
