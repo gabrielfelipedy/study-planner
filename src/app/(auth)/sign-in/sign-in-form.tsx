@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
@@ -9,18 +10,21 @@ import Link from "next/link";
 
 export function SignInForm({ callback }: { callback?: string }) {
   const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(formData: FormData) {
+    setError(null);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
-    const { data, error } = await authClient.signIn.email({
+    const { error } = await authClient.signIn.email({
       email,
       password,
     });
 
     if (error) {
-      return { error: error.message };
+      setError(error.message ?? "Something went wrong");
+      return;
     }
 
     router.push(callback || "/subjects");
@@ -28,6 +32,9 @@ export function SignInForm({ callback }: { callback?: string }) {
 
   return (
     <form action={handleSubmit} className="space-y-4">
+          {error && (
+            <p className="text-sm text-red-600">{error}</p>
+          )}
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input id="email" name="email" type="email" placeholder="you@example.com" required />

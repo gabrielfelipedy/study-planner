@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
@@ -8,13 +9,16 @@ import { Label } from "@/components/ui/label";
 
 export function ResetPasswordForm() {
   const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(formData: FormData) {
+    setError(null);
     const password = formData.get("password") as string;
     const confirmPassword = formData.get("confirmPassword") as string;
 
     if (password !== confirmPassword) {
-      return { error: "Passwords do not match" };
+      setError("Passwords do not match");
+      return;
     }
 
     const { error } = await authClient.resetPassword({
@@ -22,7 +26,8 @@ export function ResetPasswordForm() {
     });
 
     if (error) {
-      return { error: error.message };
+      setError(error.message ?? "Something went wrong");
+      return;
     }
 
     router.push("/sign-in");
@@ -30,6 +35,9 @@ export function ResetPasswordForm() {
 
   return (
     <form action={handleSubmit} className="space-y-4">
+          {error && (
+            <p className="text-sm text-red-600">{error}</p>
+          )}
       <div className="space-y-2">
         <Label htmlFor="password">New password</Label>
         <Input id="password" name="password" type="password" required />
