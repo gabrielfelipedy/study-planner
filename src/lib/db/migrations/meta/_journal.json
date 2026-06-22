@@ -8,6 +8,20 @@
       "when": 1782161089010,
       "tag": "0000_first_magdalene",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1782162364953,
+      "tag": "0001_high_iceman",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1782171689971,
+      "tag": "0002_legal_marauders",
+      "breakpoints": true
     }
   ]
 }
