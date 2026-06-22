@@ -64,25 +64,25 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | | Pending |
-| AUTH-02 | | Pending |
-| AUTH-03 | | Pending |
-| SUBJ-01 | | Pending |
-| SUBJ-02 | | Pending |
-| SUBJ-03 | | Pending |
-| TIME-01 | | Pending |
-| TIME-02 | | Pending |
-| TIME-03 | | Pending |
-| PROG-01 | | Pending |
-| PROG-02 | | Pending |
-| PROG-03 | | Pending |
-| PROG-04 | | Pending |
-| PROG-05 | | Pending |
+| AUTH-01 | Phase 2 | Pending |
+| AUTH-02 | Phase 2 | Pending |
+| AUTH-03 | Phase 2 | Pending |
+| SUBJ-01 | Phase 3 | Pending |
+| SUBJ-02 | Phase 3 | Pending |
+| SUBJ-03 | Phase 3 | Pending |
+| TIME-01 | Phase 4 | Pending |
+| TIME-02 | Phase 6 | Pending |
+| TIME-03 | Phase 4 | Pending |
+| PROG-01 | Phase 5 | Pending |
+| PROG-02 | Phase 5 | Pending |
+| PROG-03 | Phase 4 | Pending |
+| PROG-04 | Phase 8 | Pending |
+| PROG-05 | Phase 7 | Pending |
 
 **Coverage:**
 - v1 requirements: 14 total
-- Mapped to phases: 0
-- Unmapped: 14 ⚠️
+- Mapped to phases: 14
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-06-22*

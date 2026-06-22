@@ -1,0 +1,138 @@
+# Roadmap: Study Planner
+
+## Overview
+
+A personal web app that automatically creates study timetables based on deadlines. The journey moves from foundation (stack, auth, data model) through the core differentiator (timetable generation engine) to the feedback loop (tracking progress, revision scheduling, adaptive rescheduling) and finally to visualization (dashboard and charts). Each phase delivers a coherent, verifiable capability.
+
+## Phases
+
+- [ ] **Phase 1: Foundation & Data Model** - Project scaffold, Turso DB, Drizzle schema, DAL pattern, CI/CD
+- [ ] **Phase 2: Authentication** - Sign up, login/logout, password reset, protected routes
+- [ ] **Phase 3: Subject & Topic Management** - Creat/edit subjects, topics, deadlines, available time input
+- [ ] **Phase 4: Timetable Engine & Schedule View** - Auto-generate daily schedule, manual adjustment, in-app schedule view
+- [ ] **Phase 5: Study Sessions & Progress Tracking** - Mark topics as studied, track completion %, session logging
+- [ ] **Phase 6: Revision Scheduling** - Auto-schedule revisions via FSRS after topics are studied
+- [ ] **Phase 7: Adaptive Rescheduling** - Regenerate schedule from today based on actual vs planned progress
+- [ ] **Phase 8: Dashboard & Visualizations** - Charts (completion trends, study hours), positive-only metrics
+
+## Phase Details
+
+### Phase 1: Foundation & Data Model
+**Goal**: Running Next.js project with Turso database connected, all schema tables created, and data access layer structure established
+**Depends on**: Nothing (first phase)
+**Requirements**: (none — infrastructure)
+**Success Criteria** (what must be TRUE):
+  1. Developer can run `npm run dev` and see the app skeleton in browser
+  2. Turso database is connected and Drizzle migrations run successfully
+  3. All 9 schema tables (users, subjects, topics, study_plans, plan_topics, schedule_slots, study_sessions, completions, revisions) exist in the database
+  4. DAL directory structure (`lib/dal/queries/`, `lib/dal/commands/`, `lib/dal/scheduler/`) exists with skeleton exports
+  5. CI/CD pipeline (lint, type-check) passes on push via GitHub Actions
+**Plans**: TBD
+
+### Phase 2: Authentication
+**Goal**: Users can securely access their accounts with email/password
+**Depends on**: Phase 1
+**Requirements**: AUTH-01, AUTH-02, AUTH-03
+**Success Criteria** (what must be TRUE):
+  1. User can create an account with email and password on a signup page
+  2. User can log in and stay logged in across browser sessions (persistent session)
+  3. User can log out from any authenticated page
+  4. User can reset forgotten password via email link
+  5. Unauthenticated users are redirected to login when visiting protected routes
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 3: Subject & Topic Management
+**Goal**: Users can organize their study material and define scheduling constraints
+**Depends on**: Phase 2
+**Requirements**: SUBJ-01, SUBJ-02, SUBJ-03
+**Success Criteria** (what must be TRUE):
+  1. User can create subjects (e.g., "Math", "Physics") and edit/delete them
+  2. User can add topics under subjects with optional metadata (difficulty, estimated hours)
+  3. User can set a deadline for completing a set of topics within a subject
+  4. User can input their available daily or weekly study time
+  5. User can see a list of their subjects and topics on a management page
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 4: Timetable Engine & Schedule View
+**Goal**: App generates a usable daily study schedule from topics, deadline, and available time
+**Depends on**: Phase 3
+**Requirements**: TIME-01, TIME-03, PROG-03
+**Success Criteria** (what must be TRUE):
+  1. User provides subjects/topics and a deadline, and the app generates a daily schedule immediately
+  2. Schedule distributes topics evenly across available days, respecting user's available study time
+  3. User can see their scheduled topics in a daily/weekly schedule view (in-app calendar)
+  4. User can manually reschedule or drag topics to different days
+  5. Schedule includes buffer blocks (~30% unscheduled time) and catch-up days to prevent rigidity
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 5: Study Sessions & Progress Tracking
+**Goal**: Users can log study activity and see their completion progress
+**Depends on**: Phase 4
+**Requirements**: PROG-01, PROG-02
+**Success Criteria** (what must be TRUE):
+  1. User can start a study session and mark topics as studied
+  2. User can see overall progress percentage (topics completed vs planned) on the schedule view
+  3. Progress percentage updates immediately after marking topics
+  4. User can see which topics are completed, in progress, or pending in the schedule
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 6: Revision Scheduling
+**Goal**: App auto-schedules revision sessions at spaced intervals after topics are studied
+**Depends on**: Phase 5
+**Requirements**: TIME-02
+**Success Criteria** (what must be TRUE):
+  1. After marking a topic as studied, revision slots appear on the schedule at appropriate intervals
+  2. User can see revision slots visually distinguished from new study slots in the schedule view
+  3. Revision intervals use spaced repetition (FSRS) — intervals adapt based on review rating (Again/Hard/Good/Easy)
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 7: Adaptive Rescheduling
+**Goal**: Schedule adapts to the user's actual progress to stay achievable
+**Depends on**: Phase 5, Phase 4
+**Requirements**: PROG-05
+**Success Criteria** (what must be TRUE):
+  1. User can trigger "regenerate from today" to replan remaining topics based on actual progress vs planned
+  2. Behind-schedule topics are redistributed across remaining days before the deadline
+  3. Completed topics remain marked; only pending and missed topics are rescheduled
+  4. User retains manual adjustments made to the schedule after regeneration (previously set slots are preserved)
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 8: Dashboard & Visualizations
+**Goal**: Users can see progress trends and study metrics through visual charts
+**Depends on**: Phase 5, Phase 6
+**Requirements**: PROG-04
+**Success Criteria** (what must be TRUE):
+  1. User can view a dashboard page with charts showing completion over time
+  2. User can see topics completed by subject (pie/bar chart)
+  3. User can see weekly study hours vs planned hours chart
+  4. User can see revision adherence rate (scheduled vs completed revisions)
+  5. All metrics use positive/completion-based framing (no "overdue" or "missed" shame indicators)
+**Plans**: TBD
+**UI hint**: yes
+
+## Progress
+
+**Execution Order:**
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 1. Foundation & Data Model | 0/0 | Not started | - |
+| 2. Authentication | 0/0 | Not started | - |
+| 3. Subject & Topic Management | 0/0 | Not started | - |
+| 4. Timetable Engine & Schedule View | 0/0 | Not started | - |
+| 5. Study Sessions & Progress Tracking | 0/0 | Not started | - |
+| 6. Revision Scheduling | 0/0 | Not started | - |
+| 7. Adaptive Rescheduling | 0/0 | Not started | - |
+| 8. Dashboard & Visualizations | 0/0 | Not started | - |
+
+---
+
+*Created: 2026-06-22*
+*Granularity: fine (8 phases)*
