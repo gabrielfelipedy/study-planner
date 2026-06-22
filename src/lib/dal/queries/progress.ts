@@ -24,7 +24,7 @@ export const getCompletionStats = cache(async (planId: string): Promise<Completi
 /**
  * Get today's scheduled topics (study + revision).
  */
-export const getTodaySchedule = cache(async (userId: string): Promise<any[]> => {
+export const getTodaySchedule = cache(async (userId: string): Promise<unknown[]> => {
   // TODO: Query schedule_slots for current date
   return [];
 });

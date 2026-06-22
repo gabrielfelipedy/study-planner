@@ -46,6 +46,12 @@ next-env.d.ts
 *.db
 *.db-journal
 
+# OpenCode tool configuration
+.opencode/
+
+# Planning artifacts (tracked in planning repo)
+.planning/
+
 # Drizzle Kit meta
 drizzle-kit/**
 !drizzle-kit/migrator
