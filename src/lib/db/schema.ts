@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   sqliteTable,
   text,
@@ -14,8 +15,8 @@ export const users = sqliteTable("users", {
   name: text("name"),
   emailVerified: integer("email_verified", { mode: "boolean" }).default(false),
   image: text("image"),
-  createdAt: text("created_at").notNull().default("(current_timestamp)"),
-  updatedAt: text("updated_at").notNull().default("(current_timestamp)"),
+  createdAt: text("created_at").notNull().default(sql`(current_timestamp)`),
+  updatedAt: text("updated_at").notNull().default(sql`(current_timestamp)`),
 });
 
 // ── Subjects ───────────────────────────────────────
@@ -27,8 +28,8 @@ export const subjects = sqliteTable("subjects", {
   name: text("name").notNull(),
   color: text("color"),
   difficulty: text("difficulty"), // "easy" | "medium" | "hard"
-  createdAt: text("created_at").notNull().default("(current_timestamp)"),
-  updatedAt: text("updated_at").notNull().default("(current_timestamp)"),
+  createdAt: text("created_at").notNull().default(sql`(current_timestamp)`),
+  updatedAt: text("updated_at").notNull().default(sql`(current_timestamp)`),
 });
 
 // ── Topics ─────────────────────────────────────────
@@ -41,8 +42,8 @@ export const topics = sqliteTable("topics", {
   estimatedHours: real("estimated_hours").default(1.0),
   status: text("status").default("pending"), // "pending" | "studied" | "revised"
   sortOrder: integer("sort_order").default(0),
-  createdAt: text("created_at").notNull().default("(current_timestamp)"),
-  updatedAt: text("updated_at").notNull().default("(current_timestamp)"),
+  createdAt: text("created_at").notNull().default(sql`(current_timestamp)`),
+  updatedAt: text("updated_at").notNull().default(sql`(current_timestamp)`),
 });
 
 // ── Study Plans ────────────────────────────────────
@@ -58,8 +59,8 @@ export const studyPlans = sqliteTable("study_plans", {
   totalTopics: integer("total_topics").default(0),
   completedTopics: integer("completed_topics").default(0), // denormalized for fast reads
   status: text("status").default("active"), // "active" | "completed" | "paused"
-  createdAt: text("created_at").notNull().default("(current_timestamp)"),
-  updatedAt: text("updated_at").notNull().default("(current_timestamp)"),
+  createdAt: text("created_at").notNull().default(sql`(current_timestamp)`),
+  updatedAt: text("updated_at").notNull().default(sql`(current_timestamp)`),
 });
 
 // ── Plan Topics (join table) ───────────────────────
@@ -96,7 +97,7 @@ export const scheduleSlots = sqliteTable(
     estimatedMinutes: integer("estimated_minutes"),
     isCompleted: integer("is_completed", { mode: "boolean" }).default(false),
     completedAt: text("completed_at"),
-    createdAt: text("created_at").notNull().default("(current_timestamp)"),
+    createdAt: text("created_at").notNull().default(sql`(current_timestamp)`),
   },
   (table) => ({
     planDateIdx: index("idx_slots_plan_date").on(table.planId, table.date),
@@ -114,7 +115,7 @@ export const studySessions = sqliteTable("study_sessions", {
   durationMinutes: integer("duration_minutes"),
   date: text("date").notNull(), // ISO date
   notes: text("notes"),
-  createdAt: text("created_at").notNull().default("(current_timestamp)"),
+  createdAt: text("created_at").notNull().default(sql`(current_timestamp)`),
 });
 
 // ── Completions (audit log) ────────────────────────
@@ -130,7 +131,7 @@ export const completions = sqliteTable("completions", {
     .notNull()
     .references(() => topics.id, { onDelete: "cascade" }),
   date: text("date").notNull(),
-  createdAt: text("created_at").notNull().default("(current_timestamp)"),
+  createdAt: text("created_at").notNull().default(sql`(current_timestamp)`),
 });
 
 // ── Revisions ──────────────────────────────────────
@@ -149,7 +150,7 @@ export const revisions = sqliteTable(
     interval: integer("interval"), // days since original study
     isCompleted: integer("is_completed", { mode: "boolean" }).default(false),
     completedAt: text("completed_at"),
-    createdAt: text("created_at").notNull().default("(current_timestamp)"),
+    createdAt: text("created_at").notNull().default(sql`(current_timestamp)`),
   },
   (table) => ({
     planDateIdx: index("idx_revisions_plan_date").on(table.planId, table.scheduledDate),
