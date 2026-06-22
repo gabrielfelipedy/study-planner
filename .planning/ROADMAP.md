@@ -27,7 +27,13 @@ A personal web app that automatically creates study timetables based on deadline
   3. All 9 schema tables (users, subjects, topics, study_plans, plan_topics, schedule_slots, study_sessions, completions, revisions) exist in the database
   4. DAL directory structure (`lib/dal/queries/`, `lib/dal/commands/`, `lib/dal/scheduler/`) exists with skeleton exports
   5. CI/CD pipeline (lint, type-check) passes on push via GitHub Actions
-**Plans**: TBD
+**Plans**: 4 plans (2 waves)
+
+Plans:
+- [ ] 01-01-PLAN.md — Project scaffold (Next.js 16, dependencies, Drizzle config, env templates)
+- [ ] 01-02-PLAN.md — Database schema & client (all 9 tables, local SQLite dev connection)
+- [ ] 01-03-PLAN.md — Data Access Layer skeleton (11 files across queries, commands, scheduler)
+- [ ] 01-04-PLAN.md — GitHub repository & CI/CD (git init, Actions workflow, push)
 
 ### Phase 2: Authentication
 **Goal**: Users can securely access their accounts with email/password
@@ -123,7 +129,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Data Model | 0/0 | Not started | - |
+| 1. Foundation & Data Model | 0/4 | Planning complete | - |
 | 2. Authentication | 0/0 | Not started | - |
 | 3. Subject & Topic Management | 0/0 | Not started | - |
 | 4. Timetable Engine & Schedule View | 0/0 | Not started | - |
