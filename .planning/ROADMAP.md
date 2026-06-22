@@ -35,18 +35,21 @@ Plans:
 - [x] 01-03-PLAN.md — Data Access Layer skeleton (11 files across queries, commands, scheduler)
 - [x] 01-04-PLAN.md — GitHub repository & CI/CD (git init, Actions workflow, push)
 
-### Phase 2: Authentication
+### Phase 2: Authentication ✓
 **Goal**: Users can securely access their accounts with email/password
 **Depends on**: Phase 1
 **Requirements**: AUTH-01, AUTH-02, AUTH-03
 **Success Criteria** (what must be TRUE):
-  1. User can create an account with email and password on a signup page
-  2. User can log in and stay logged in across browser sessions (persistent session)
-  3. User can log out from any authenticated page
-  4. User can reset forgotten password via email link
-  5. Unauthenticated users are redirected to login when visiting protected routes
-**Plans**: TBD
+    1. User can create an account with email and password on a signup page
+    2. User can log in and stay logged in across browser sessions (persistent session)
+    3. User can log out from any authenticated page
+    4. User can reset forgotten password via email link
+    5. Unauthenticated users are redirected to login when visiting protected routes
+**Plans**: 1 plan (1 wave)
 **UI hint**: yes
+
+Plans:
+- [x] 02-01-PLAN.md — Better Auth integration, auth pages, middleware, nav
 
 ### Phase 3: Subject & Topic Management
 **Goal**: Users can organize their study material and define scheduling constraints
@@ -130,7 +133,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Data Model | 4/4 | ✓ Complete | 2026-06-22 |
-| 2. Authentication | 0/0 | Not started | - |
+| 2. Authentication | 1/1 | ✓ Complete | 2026-06-22 |
 | 3. Subject & Topic Management | 0/0 | Not started | - |
 | 4. Timetable Engine & Schedule View | 0/0 | Not started | - |
 | 5. Study Sessions & Progress Tracking | 0/0 | Not started | - |
