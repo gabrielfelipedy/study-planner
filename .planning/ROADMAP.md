@@ -117,7 +117,7 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 06-01-PLAN.md — FSRS Engine & Integration: schema columns, ts-fsrs install, scheduleRevision/processReviewRating DAL, wire into markTopicStudied, Server Actions
+- [x] 06-01-PLAN.md — FSRS Engine & Integration: schema columns, ts-fsrs install, scheduleRevision/processReviewRating DAL, wire into markTopicStudied, Server Actions
 - [ ] 06-02-PLAN.md — Revision UI: calendar slot styling (purple/indigo), revision-rating component (Again/Hard/Good/Easy)
 
 ### Phase 7: Adaptive Rescheduling
@@ -157,7 +157,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 3. Subject & Topic Management | 3/3 | ✓ Complete | 2026-06-23 |
 | 4. Timetable Engine & Schedule View | 4/4 | ✓ Complete | 2026-06-23 |
 | 5. Study Sessions & Progress Tracking | 3/3 | ✓ Complete | 2026-06-23 |
-| 6. Revision Scheduling | 2/2 | Planned | - |
+| 6. Revision Scheduling | 1/2 | In Progress | 2026-06-23 |
 | 7. Adaptive Rescheduling | 0/0 | Not started | - |
 | 8. Dashboard & Visualizations | 0/0 | Not started | - |
 

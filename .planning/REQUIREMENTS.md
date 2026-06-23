@@ -22,12 +22,12 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Timetable
 
 - [ ] **TIME-01**: App auto-generates daily schedule distributing topics evenly before the deadline
-- [ ] **TIME-02**: App auto-schedules 7d and 30d revision slots after a topic is marked as studied
+- [x] **TIME-02**: App auto-schedules 7d and 30d revision slots after a topic is marked as studied
 - [ ] **TIME-03**: User can manually adjust the generated schedule
 
 ### Progress & Tracking
 
-- [ ] **PROG-01**: User can mark topics as studied during sessions
+- [x] **PROG-01**: User can mark topics as studied during sessions
 - [ ] **PROG-02**: User can see overall progress percentage (topics completed vs planned)
 - [ ] **PROG-03**: User can view scheduled topics on an in-app calendar
 - [ ] **PROG-04**: User can view charts with progress metrics over time
@@ -71,9 +71,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SUBJ-02 | Phase 3 | Done |
 | SUBJ-03 | Phase 3 | Done |
 | TIME-01 | Phase 4 | Pending |
-| TIME-02 | Phase 6 | Pending |
+| TIME-02 | Phase 6 | Done |
 | TIME-03 | Phase 4 | Pending |
-| PROG-01 | Phase 5 | Pending |
+| PROG-01 | Phase 5 | Done |
 | PROG-02 | Phase 5 | Pending |
 | PROG-03 | Phase 4 | Pending |
 | PROG-04 | Phase 8 | Pending |
