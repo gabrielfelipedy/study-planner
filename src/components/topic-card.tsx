@@ -2,8 +2,9 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export type TopicCardSlot = {
   id: string;
@@ -13,14 +14,25 @@ export type TopicCardSlot = {
   isCompleted: boolean;
   subjectColor?: string;
   subjectName?: string;
+  type?: "study" | "buffer" | "catch-up" | "revision-7d" | "revision-30d";
 };
 
 type TopicCardProps = {
   slot: TopicCardSlot;
   isDragOverlay?: boolean;
+  planId?: string;
+  onMarked?: () => void;
+  onShowToast?: (message: string) => void;
 };
 
-export function TopicCard({ slot, isDragOverlay = false }: TopicCardProps) {
+export function TopicCard({
+  slot,
+  isDragOverlay = false,
+  planId,
+  onMarked,
+  onShowToast,
+}: TopicCardProps) {
+  const isRevision = slot.type === "revision-7d" || slot.type === "revision-30d";
   const {
     attributes,
     listeners,
@@ -28,7 +40,7 @@ export function TopicCard({ slot, isDragOverlay = false }: TopicCardProps) {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: slot.id });
+  } = useSortable({ id: slot.id, disabled: isRevision });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -36,7 +48,31 @@ export function TopicCard({ slot, isDragOverlay = false }: TopicCardProps) {
   };
 
   const [mounted, setMounted] = useState(false);
+  const [showMarkButton, setShowMarkButton] = useState(false);
+  const [isMarking, setIsMarking] = useState(false);
+
   useEffect(() => { setMounted(true); }, []);
+
+  function handleCardClick() {
+    if (isDragging || isDragOverlay || slot.isCompleted || isMarking || !planId) return;
+    setShowMarkButton((prev) => !prev);
+  }
+
+  const handleMarkComplete = useCallback(async () => {
+    if (!planId) return;
+    setIsMarking(true);
+    try {
+      const { markTopicStudiedAction } = await import("@/app/plans/[id]/actions");
+      const result = await markTopicStudiedAction(planId, slot.topicId);
+      if (result.success) {
+        onMarked?.();
+        onShowToast?.("Topic marked as studied! ✓");
+        setShowMarkButton(false);
+      }
+    } finally {
+      setIsMarking(false);
+    }
+  }, [planId, slot.topicId, onMarked, onShowToast]);
 
   if (isDragOverlay) {
     return (
@@ -58,16 +94,37 @@ export function TopicCard({ slot, isDragOverlay = false }: TopicCardProps) {
       style={style}
       {...(mounted ? attributes : {})}
       {...listeners}
-      className={`mb-1 flex items-center gap-1.5 rounded-md border bg-card p-1.5 text-xs transition-colors hover:bg-muted/50 cursor-grab active:cursor-grabbing ${isDragging ? "opacity-30" : ""} ${slot.isCompleted ? "opacity-60" : ""}`}
+      onClick={handleCardClick}
+      className={`mb-1 rounded-md border bg-card p-1.5 text-xs transition-colors hover:bg-muted/50 ${isRevision ? "cursor-pointer border-indigo-300 bg-indigo-50 dark:border-indigo-800 dark:bg-indigo-950/40" : "cursor-grab active:cursor-grabbing"} ${isDragging ? "opacity-30" : ""} ${slot.isCompleted ? "opacity-60" : ""}`}
       aria-roledescription="draggable topic"
       aria-label={`Topic: ${slot.title ?? "Study"}, Duration: ${slot.estimatedMinutes} minutes`}
     >
-      {slot.subjectColor && (
-        <div className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: slot.subjectColor }} />
+      <div className="flex items-center gap-1.5">
+        {slot.subjectColor && (
+          <div className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: slot.subjectColor }} />
+        )}
+        <span className="truncate flex-1 text-xs font-medium text-foreground">{slot.title ?? "Study"}</span>
+        <Badge
+          variant="secondary"
+          className={`text-[10px] px-1.5 py-0 ${slot.isCompleted ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : ""} ${isRevision && !slot.isCompleted ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400" : ""}`}
+        >
+          {slot.isCompleted ? "✓" : isRevision ? "Review" : "Pending"}
+        </Badge>
+        <span className="text-xs text-muted-foreground">{slot.estimatedMinutes}m</span>
+      </div>
+      {showMarkButton && (
+        <div className="mt-1.5 flex items-center gap-2 border-t border-border pt-1.5">
+          <Button
+            size="sm"
+            variant="default"
+            className="h-7 w-full text-xs"
+            onClick={(e) => { e.stopPropagation(); handleMarkComplete(); }}
+            disabled={isMarking}
+          >
+            {isMarking ? "Marking..." : "Mark studied"}
+          </Button>
+        </div>
       )}
-      <span className="truncate flex-1 text-xs font-medium text-foreground">{slot.title ?? "Study"}</span>
-      <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Pending</Badge>
-      <span className="text-xs text-muted-foreground">{slot.estimatedMinutes}m</span>
     </div>
   );
 }

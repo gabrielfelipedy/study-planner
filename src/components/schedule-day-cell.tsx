@@ -17,6 +17,9 @@ type ScheduleDayCellProps = {
   isToday: boolean;
   isPast: boolean;
   isStudyDay: boolean;
+  planId?: string;
+  onTopicMarked?: () => void;
+  onShowToast?: (message: string) => void;
 };
 
 export function ScheduleDayCell({
@@ -26,11 +29,17 @@ export function ScheduleDayCell({
   isToday,
   isPast,
   isStudyDay,
+  planId,
+  onTopicMarked,
+  onShowToast,
 }: ScheduleDayCellProps) {
   const { setNodeRef, isOver } = useDroppable({ id: `day-${dateStr}` });
 
   const bufferSlots = slots.filter((s) => s.type === "buffer" || s.type === "catch-up");
   const studySlots = slots.filter((s) => s.type === "study");
+  const revisionSlots = slots.filter(
+    (s) => s.type === "revision-7d" || s.type === "revision-30d"
+  );
   const hasCatchUp = bufferSlots.some((s) => s.type === "catch-up");
   const hasBuffer = bufferSlots.some((s) => s.type === "buffer");
 
@@ -55,9 +64,26 @@ export function ScheduleDayCell({
       </div>
       <SortableContext items={studySlots.map((s) => s.id)} strategy={verticalListSortingStrategy}>
         {studySlots.map((slot) => (
-          <TopicCard key={slot.id} slot={slot} />
+          <TopicCard
+            key={slot.id}
+            slot={slot}
+            planId={planId}
+            onMarked={onTopicMarked}
+            onShowToast={onShowToast}
+          />
         ))}
       </SortableContext>
+
+      {revisionSlots.map((slot) => (
+        <TopicCard
+          key={slot.id}
+          slot={slot}
+          planId={planId}
+          onMarked={onTopicMarked}
+          onShowToast={onShowToast}
+        />
+      ))}
+
       {hasCatchUp && (
         <div className="mt-1 text-center text-xs font-medium text-amber-500">Catch-up</div>
       )}
