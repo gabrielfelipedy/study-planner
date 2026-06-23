@@ -5,6 +5,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { useEffect, useState, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { RevisionRating } from "@/components/revision-rating";
 
 export type TopicCardSlot = {
   id: string;
@@ -113,16 +114,32 @@ export function TopicCard({
         <span className="text-xs text-muted-foreground">{slot.estimatedMinutes}m</span>
       </div>
       {showMarkButton && (
-        <div className="mt-1.5 flex items-center gap-2 border-t border-border pt-1.5">
-          <Button
-            size="sm"
-            variant="default"
-            className="h-7 w-full text-xs"
-            onClick={(e) => { e.stopPropagation(); handleMarkComplete(); }}
-            disabled={isMarking}
-          >
-            {isMarking ? "Marking..." : "Mark studied"}
-          </Button>
+        <div className="mt-1.5 border-t border-border pt-1.5">
+          {isRevision ? (
+            <RevisionRating
+              slotId={slot.id}
+              planId={planId ?? ""}
+              topicId={slot.topicId}
+              onComplete={() => {
+                onMarked?.();
+                onShowToast?.("Review recorded! ✓");
+                setShowMarkButton(false);
+              }}
+              onError={(msg) => onShowToast?.(msg)}
+            />
+          ) : (
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="default"
+                className="h-7 w-full text-xs"
+                onClick={(e) => { e.stopPropagation(); handleMarkComplete(); }}
+                disabled={isMarking}
+              >
+                {isMarking ? "Marking..." : "Mark studied"}
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>
