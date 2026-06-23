@@ -2,6 +2,7 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 
 export type TopicCardSlot = {
@@ -34,6 +35,9 @@ export function TopicCard({ slot, isDragOverlay = false }: TopicCardProps) {
     transition,
   };
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
   if (isDragOverlay) {
     return (
       <div className="mb-1 rounded-md border bg-card p-1.5 shadow-lg opacity-90 rotate-1 scale-105 ring-1 ring-border pointer-events-none">
@@ -52,7 +56,7 @@ export function TopicCard({ slot, isDragOverlay = false }: TopicCardProps) {
     <div
       ref={setNodeRef}
       style={style}
-      {...attributes}
+      {...(mounted ? attributes : {})}
       {...listeners}
       className={`mb-1 flex items-center gap-1.5 rounded-md border bg-card p-1.5 text-xs transition-colors hover:bg-muted/50 cursor-grab active:cursor-grabbing ${isDragging ? "opacity-30" : ""} ${slot.isCompleted ? "opacity-60" : ""}`}
       aria-roledescription="draggable topic"
