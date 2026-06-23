@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: complete
-stopped_at: Phase 5 context gathered
-last_updated: "2026-06-23T10:05:00.000Z"
-last_activity: 2026-06-23 -- Phase 5 context gathered
+stopped_at: Phase 6 context gathered
+last_updated: "2026-06-23T12:00:00.000Z"
+last_activity: 2026-06-23 -- Phase 6 context gathered
 progress:
   total_phases: 8
   completed_phases: 3
-  planned_phases: 3
+  planned_phases: 4
   total_plans: 9
   completed_plans: 8
   percent: 38
@@ -22,7 +22,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-22)
 
 **Core value:** Given a set of topics and a deadline, the app produces a usable daily study schedule
-**Current focus:** Phase 5 — Study Sessions & Progress Tracking
+**Current focus:** Phase 6 — Revision Scheduling
 
 ## Current Position
 
@@ -34,7 +34,9 @@ Phase: 03 (subject-topic-management) — COMPLETE
 Plan: 3 of 3
 Phase: 05 (study-sessions-progress-tracking) — GATHERING CONTEXT
 Status: Phase 5 context gathered
-Last activity: 2026-06-23 -- Phase 5 context gathered
+Phase: 06 (revision-scheduling) — GATHERING CONTEXT
+Status: Phase 6 context gathered
+Last activity: 2026-06-23 -- Phase 6 context gathered
 
 Progress: [███████████           ] 50%
 
@@ -86,5 +88,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-06-23
-Stopped at: Phase 4 context gathered
-Resume file: .planning/phases/05-study-sessions-progress-tracking/05-CONTEXT.md
+Stopped at: Phase 6 context gathered
+Resume file: .planning/phases/06-revision-scheduling/06-CONTEXT.md
