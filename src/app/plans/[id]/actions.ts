@@ -9,6 +9,10 @@ import { eq, and } from "drizzle-orm";
 import { generateSchedule } from "@/lib/dal/scheduler/distribute";
 import { saveSchedule } from "@/lib/dal/commands/schedule";
 import { getPlanById, getTopicsForPlan } from "@/lib/dal/queries/plans";
+import { markTopicStudied } from "@/lib/dal/commands/progress";
+import { scheduleRevision, processReviewRating } from "@/lib/dal/scheduler/revisions";
+import type { RevisionRating } from "@/lib/dal/scheduler/revisions";
+import { getCurrentRevisionState, getPendingRevisionSlots } from "@/lib/dal/queries/revisions";
 
 export type GenerateResult = {
   success: boolean;
@@ -136,4 +140,112 @@ export async function regenerateScheduleAction(
   planId: string
 ): Promise<GenerateResult> {
   return generateScheduleAction(planId);
+}
+
+export type MarkStudiedResult = {
+  success: boolean;
+  message?: string;
+};
+
+export async function markTopicStudiedAction(
+  planId: string,
+  topicId: string
+): Promise<MarkStudiedResult> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user?.id) {
+    return { success: false, message: "Not authenticated" };
+  }
+
+  const plan = await getPlanById(planId, session.user.id);
+  if (!plan) {
+    return { success: false, message: "Plan not found" };
+  }
+
+  try {
+    await markTopicStudied(planId, topicId, session.user.id);
+    revalidatePath(`/plans/${planId}`);
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to mark topic as studied",
+    };
+  }
+}
+
+/**
+ * Process a review rating for a topic in a plan.
+ */
+export async function reviewRevisionRatingAction(
+  planId: string,
+  topicId: string,
+  rating: RevisionRating
+): Promise<{ success: boolean; message?: string }> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user?.id) {
+    return { success: false, message: "Not authenticated" };
+  }
+
+  const plan = await getPlanById(planId, session.user.id);
+  if (!plan) {
+    return { success: false, message: "Plan not found" };
+  }
+
+  // Get current revision state to find the revision ID
+  const currentState = await getCurrentRevisionState(planId, topicId);
+  if (!currentState) {
+    return { success: false, message: "No revision found for this topic" };
+  }
+
+  try {
+    await processReviewRating(planId, topicId, rating);
+    revalidatePath(`/plans/${planId}`);
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to process review rating",
+    };
+  }
+}
+
+/**
+ * Process a review rating from a calendar slot (looks up topicId from slotId).
+ */
+export async function reviewSlotAction(
+  slotId: string,
+  planId: string,
+  rating: RevisionRating
+): Promise<{ success: boolean; message?: string }> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user?.id) {
+    return { success: false, message: "Not authenticated" };
+  }
+
+  const plan = await getPlanById(planId, session.user.id);
+  if (!plan) {
+    return { success: false, message: "Plan not found" };
+  }
+
+  // Get the schedule slot to find topicId
+  const slot = await db
+    .select({ topicId: scheduleSlots.topicId })
+    .from(scheduleSlots)
+    .where(and(eq(scheduleSlots.id, slotId), eq(scheduleSlots.planId, planId)))
+    .get();
+
+  if (!slot?.topicId) {
+    return { success: false, message: "Slot not found or has no topic" };
+  }
+
+  try {
+    await processReviewRating(planId, slot.topicId, rating);
+    revalidatePath(`/plans/${planId}`);
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to process review rating",
+    };
+  }
 }
