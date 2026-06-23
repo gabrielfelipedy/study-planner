@@ -30,6 +30,7 @@ export const subjects = sqliteTable("subjects", {
   difficulty: text("difficulty"), // "easy" | "medium" | "hard"
   createdAt: text("created_at").notNull().default(sql`(current_timestamp)`),
   updatedAt: text("updated_at").notNull().default(sql`(current_timestamp)`),
+  archivedAt: text("archived_at"),
 });
 
 // ── Topics ─────────────────────────────────────────

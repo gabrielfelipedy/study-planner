@@ -61,8 +61,13 @@ Plans:
   3. User can set a deadline for completing a set of topics within a subject
   4. User can input their available daily or weekly study time
   5. User can see a list of their subjects and topics on a management page
-**Plans**: TBD
+**Plans**: 3 plans (2 waves)
 **UI hint**: yes
+
+Plans:
+- [ ] 03-01-PLAN.md — Subject management: schema (archivedAt), DAL, card grid list, create/edit pages, archive dialog
+- [ ] 03-02-PLAN.md — Topic management: DAL (bulk create, reorder, batch delete), subject detail page with inline list, bulk add, inline edit, drag-drop, select mode
+- [ ] 03-03-PLAN.md — Study plan management: schema (hoursPerWeek, studyDays, archived), plan DAL, nav link, plan pages, study time input
 
 ### Phase 4: Timetable Engine & Schedule View
 **Goal**: App generates a usable daily study schedule from topics, deadline, and available time
@@ -134,7 +139,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 |-------|----------------|--------|-----------|
 | 1. Foundation & Data Model | 4/4 | ✓ Complete | 2026-06-22 |
 | 2. Authentication | 1/1 | ✓ Complete | 2026-06-22 |
-| 3. Subject & Topic Management | 0/0 | Not started | - |
+| 3. Subject & Topic Management | 0/3 | Planning | - |
 | 4. Timetable Engine & Schedule View | 0/0 | Not started | - |
 | 5. Study Sessions & Progress Tracking | 0/0 | Not started | - |
 | 6. Revision Scheduling | 0/0 | Not started | - |
