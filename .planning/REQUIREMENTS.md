@@ -9,15 +9,15 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Authentication
 
-- [ ] **AUTH-01**: User can sign up with email and password
-- [ ] **AUTH-02**: User can log in and stay logged in across sessions
-- [ ] **AUTH-03**: User can reset password via email link
+- [x] **AUTH-01**: User can sign up with email and password
+- [x] **AUTH-02**: User can log in and stay logged in across sessions
+- [x] **AUTH-03**: User can reset password via email link
 
 ### Subjects & Topics
 
-- [ ] **SUBJ-01**: User can create subjects and organize topics under them
-- [ ] **SUBJ-02**: User can set a deadline for completing a set of topics
-- [ ] **SUBJ-03**: User can input available daily/weekly study time
+- [x] **SUBJ-01**: User can create subjects and organize topics under them
+- [x] **SUBJ-02**: User can set a deadline for completing a set of topics
+- [x] **SUBJ-03**: User can input available weekly study time (hours/week + days)
 
 ### Timetable
 
@@ -64,12 +64,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | Phase 2 | Pending |
-| AUTH-02 | Phase 2 | Pending |
-| AUTH-03 | Phase 2 | Pending |
-| SUBJ-01 | Phase 3 | Pending |
-| SUBJ-02 | Phase 3 | Pending |
-| SUBJ-03 | Phase 3 | Pending |
+| AUTH-01 | Phase 2 | Done |
+| AUTH-02 | Phase 2 | Done |
+| AUTH-03 | Phase 2 | Done |
+| SUBJ-01 | Phase 3 | Done |
+| SUBJ-02 | Phase 3 | Done |
+| SUBJ-03 | Phase 3 | Done |
 | TIME-01 | Phase 4 | Pending |
 | TIME-02 | Phase 6 | Pending |
 | TIME-03 | Phase 4 | Pending |
