@@ -16,6 +16,7 @@ export type TopicCardSlot = {
   subjectColor?: string;
   subjectName?: string;
   type?: "study" | "buffer" | "catch-up" | "revision-7d" | "revision-30d";
+  isBehind?: boolean;
 };
 
 type TopicCardProps = {
@@ -96,7 +97,7 @@ export function TopicCard({
       {...(mounted ? attributes : {})}
       {...listeners}
       onClick={handleCardClick}
-      className={`mb-1 rounded-md border bg-card p-1.5 text-xs transition-colors hover:bg-muted/50 ${isRevision ? "cursor-pointer border-indigo-300 bg-indigo-50 dark:border-indigo-800 dark:bg-indigo-950/40" : "cursor-grab active:cursor-grabbing"} ${isDragging ? "opacity-30" : ""} ${slot.isCompleted ? "opacity-60" : ""}`}
+      className={`mb-1 rounded-md border bg-card p-1.5 text-xs transition-colors hover:bg-muted/50 ${isRevision ? "cursor-pointer border-indigo-300 bg-indigo-50 dark:border-indigo-800 dark:bg-indigo-950/40" : "cursor-grab active:cursor-grabbing"} ${isDragging ? "opacity-30" : ""} ${slot.isCompleted ? "opacity-60" : ""} ${slot.isBehind ? "border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/40" : ""}`}
       aria-roledescription="draggable topic"
       aria-label={`Topic: ${slot.title ?? "Study"}, Duration: ${slot.estimatedMinutes} minutes`}
     >

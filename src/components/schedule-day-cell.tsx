@@ -42,6 +42,7 @@ export function ScheduleDayCell({
   );
   const hasCatchUp = bufferSlots.some((s) => s.type === "catch-up");
   const hasBuffer = bufferSlots.some((s) => s.type === "buffer");
+  const hasBehind = isPast && studySlots.some((s) => !s.isCompleted);
 
   let cellClasses = "min-h-[120px] border-r border-b border-border p-2 transition-colors";
   if (isToday) cellClasses += " bg-accent border-b-2 border-primary";
@@ -57,13 +58,33 @@ export function ScheduleDayCell({
     cellClasses += " bg-muted/20";
   }
 
+  if (hasBehind) {
+    cellClasses += " bg-amber-950/20";
+  }
+
+  const behindTopicIds = new Set(
+    isPast
+      ? studySlots.filter((s) => !s.isCompleted).map((s) => s.topicId)
+      : []
+  );
+
+  const enrichedStudySlots = studySlots.map((s) => ({
+    ...s,
+    isBehind: s.topicId ? behindTopicIds.has(s.topicId) : false,
+  }));
+
+  const enrichedRevisionSlots = revisionSlots.map((s) => ({
+    ...s,
+    isBehind: isPast && !s.isCompleted,
+  }));
+
   return (
     <div ref={setNodeRef} className={cellClasses + catchUpStyle}>
       <div className="mb-1 text-center text-xs text-muted-foreground">
         {format(date, "d")}
       </div>
-      <SortableContext items={studySlots.map((s) => s.id)} strategy={verticalListSortingStrategy}>
-        {studySlots.map((slot) => (
+      <SortableContext items={enrichedStudySlots.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+        {enrichedStudySlots.map((slot) => (
           <TopicCard
             key={slot.id}
             slot={slot}
@@ -74,7 +95,7 @@ export function ScheduleDayCell({
         ))}
       </SortableContext>
 
-      {revisionSlots.map((slot) => (
+      {enrichedRevisionSlots.map((slot) => (
         <TopicCard
           key={slot.id}
           slot={slot}

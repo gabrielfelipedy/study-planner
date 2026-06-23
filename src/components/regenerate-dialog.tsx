@@ -59,7 +59,7 @@ export function RegenerateDialog({
         <DialogHeader>
           <DialogTitle>Regenerate schedule?</DialogTitle>
           <DialogDescription>
-            Manual adjustments to the current schedule will be lost.
+            Manual adjustments to future dates will be preserved.
           </DialogDescription>
         </DialogHeader>
         {error && (
