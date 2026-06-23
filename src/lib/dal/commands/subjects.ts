@@ -1,5 +1,5 @@
 import { db } from "@/lib/db/client";
-import { subjects, topics } from "@/lib/db/schema";
+import { subjects, topics, scheduleSlots, planTopics, studyPlans } from "@/lib/db/schema";
 import { eq, and, inArray, sql } from "drizzle-orm";
 
 export type CreateSubjectInput = {
@@ -39,6 +39,37 @@ export async function updateSubject(
 }
 
 export async function archiveSubject(subjectId: string, userId: string): Promise<void> {
+  const topicRows = await db
+    .select({ id: topics.id })
+    .from(topics)
+    .where(eq(topics.subjectId, subjectId))
+    .all();
+  const topicIds = topicRows.map((t) => t.id);
+
+  if (topicIds.length > 0) {
+    const affectedPlans = await db
+      .select({ planId: planTopics.planId })
+      .from(planTopics)
+      .where(inArray(planTopics.topicId, topicIds))
+      .all();
+    const planIds = [...new Set(affectedPlans.map((r) => r.planId))];
+
+    await db.delete(scheduleSlots).where(inArray(scheduleSlots.topicId, topicIds));
+    await db.delete(planTopics).where(inArray(planTopics.topicId, topicIds));
+
+    for (const planId of planIds) {
+      const count = await db
+        .select({ total: sql<number>`count(*)` })
+        .from(planTopics)
+        .where(eq(planTopics.planId, planId))
+        .get();
+      await db
+        .update(studyPlans)
+        .set({ totalTopics: count?.total ?? 0, updatedAt: new Date().toISOString() })
+        .where(eq(studyPlans.id, planId));
+    }
+  }
+
   await db
     .update(subjects)
     .set({ archivedAt: new Date().toISOString(), updatedAt: new Date().toISOString() })
@@ -119,12 +150,39 @@ export async function updateTopic(
 export async function deleteTopic(topicId: string): Promise<void> {
   const existing = await db.select().from(topics).where(eq(topics.id, topicId)).get();
   if (!existing) throw new Error("Topic not found");
+
+  await db.delete(scheduleSlots).where(eq(scheduleSlots.topicId, topicId));
+  await db.delete(planTopics).where(eq(planTopics.topicId, topicId));
   await db.delete(topics).where(eq(topics.id, topicId));
 }
 
 export async function deleteTopics(topicIds: string[]): Promise<void> {
   if (topicIds.length === 0) return;
+
+  // Find affected plans before deleting
+  const affectedPlans = await db
+    .select({ planId: planTopics.planId })
+    .from(planTopics)
+    .where(inArray(planTopics.topicId, topicIds))
+    .all();
+  const planIds = [...new Set(affectedPlans.map((r) => r.planId))];
+
+  await db.delete(scheduleSlots).where(inArray(scheduleSlots.topicId, topicIds));
+  await db.delete(planTopics).where(inArray(planTopics.topicId, topicIds));
   await db.delete(topics).where(inArray(topics.id, topicIds));
+
+  // Update plan total topics counts
+  for (const planId of planIds) {
+    const count = await db
+      .select({ total: sql<number>`count(*)` })
+      .from(planTopics)
+      .where(eq(planTopics.planId, planId))
+      .get();
+    await db
+      .update(studyPlans)
+      .set({ totalTopics: count?.total ?? 0, updatedAt: new Date().toISOString() })
+      .where(eq(studyPlans.id, planId));
+  }
 }
 
 export async function reorderTopics(
