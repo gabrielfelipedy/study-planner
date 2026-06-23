@@ -21,6 +21,10 @@ export type PlanWithSubjects = PlanSummary & {
   archivedAt: string | null;
   totalTopics: number;
   completedTopics: number;
+  lastScheduleHoursPerWeek: number | null;
+  lastScheduleStudyDays: string | null;
+  lastScheduleStartDate: string | null;
+  lastScheduleDeadline: string | null;
   subjects: Array<{
     id: string;
     name: string;
@@ -94,6 +98,10 @@ export const getPlanById = cache(async (planId: string, userId: string): Promise
     studyDays: plan.studyDays,
     createdAt: plan.createdAt,
     archivedAt: plan.archivedAt,
+    lastScheduleHoursPerWeek: plan.lastScheduleHoursPerWeek,
+    lastScheduleStudyDays: plan.lastScheduleStudyDays,
+    lastScheduleStartDate: plan.lastScheduleStartDate,
+    lastScheduleDeadline: plan.lastScheduleDeadline,
     subjects: linkedSubjects,
   };
 });

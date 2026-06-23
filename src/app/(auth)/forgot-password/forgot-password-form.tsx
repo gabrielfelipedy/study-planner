@@ -47,7 +47,7 @@ export function ForgotPasswordForm() {
   return (
     <form action={handleSubmit} className="space-y-4">
       {error && <p className="text-sm text-destructive">{error}</p>}
-      <p className="text-sm text-zinc-500">
+      <p className="text-sm text-muted-foreground">
         Enter your email address and we&apos;ll send you a link to reset your
         password.
       </p>
@@ -58,7 +58,7 @@ export function ForgotPasswordForm() {
       <Button type="submit" className="w-full">
         Send reset link
       </Button>
-      <p className="text-center text-sm text-zinc-500">
+      <p className="text-center text-sm text-muted-foreground">
         <Link href="/sign-in" className="text-primary hover:underline">
           Back to sign in
         </Link>

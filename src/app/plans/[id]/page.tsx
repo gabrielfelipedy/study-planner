@@ -6,8 +6,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getPlanById } from "@/lib/dal/queries/plans";
+import { getScheduleSlots } from "@/lib/dal/queries/calendar";
 import { StudyTimeForm } from "@/components/study-time-form";
 import { ArchiveDialog } from "@/components/archive-dialog";
+import { ScheduleGenerator } from "@/components/schedule-generator";
+import { ScheduleWithDialogs } from "@/components/schedule-with-dialogs";
 
 export default async function PlanDetailPage({
   params,
@@ -21,11 +24,23 @@ export default async function PlanDetailPage({
   const plan = await getPlanById(id, session.user.id);
   if (!plan) notFound();
 
+  const slots = await getScheduleSlots(id, plan.startDate, plan.deadline);
+  const hasSchedule = slots.length > 0;
+  const hasTopics = plan.totalTopics > 0;
+  const hasStudyInputs = plan.hoursPerWeek && plan.studyDays;
+
+  const hasStaleInputs =
+    hasSchedule &&
+    (plan.lastScheduleHoursPerWeek !== plan.hoursPerWeek ||
+      plan.lastScheduleStudyDays !== plan.studyDays ||
+      plan.lastScheduleStartDate !== plan.startDate ||
+      plan.lastScheduleDeadline !== plan.deadline);
+
   const deadlineDate = new Date(plan.deadline);
   const startDate = new Date(plan.startDate);
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
+    <div className="mx-auto max-w-5xl px-4 py-8">
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
@@ -104,18 +119,61 @@ export default async function PlanDetailPage({
         )}
       </section>
 
-      <StudyTimeForm
-        planId={id}
-        userId={session.user.id}
-        initialHoursPerWeek={plan.hoursPerWeek}
-        initialStudyDays={plan.studyDays}
-      />
-
-      <div className="mt-8 rounded-lg border-2 border-dashed border-border p-8 text-center">
-        <p className="text-sm text-muted-foreground">
-          Schedule generation will appear here in Phase 4.
-        </p>
+      <div id="study-time-form">
+        <StudyTimeForm
+          planId={id}
+          userId={session.user.id}
+          initialHoursPerWeek={plan.hoursPerWeek}
+          initialStudyDays={plan.studyDays}
+        />
       </div>
+
+      <section className="mt-8">
+        {!hasStudyInputs || !hasTopics ? (
+          <div className="rounded-lg border-2 border-dashed border-border p-12 text-center">
+            <h3 className="text-lg font-medium text-foreground">No schedule yet</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {!hasTopics
+                ? "No topics in this plan. Add topics to your subjects before generating a schedule."
+                : "Set your study availability and add topics to generate a schedule."}
+            </p>
+            {!hasStudyInputs && (
+              <Link href={`/plans/${id}/edit`}>
+                <Button variant="default" className="mt-4">
+                  Set study time
+                </Button>
+              </Link>
+            )}
+            {!hasTopics && (
+              <Link href="/subjects">
+                <Button variant="default" className="mt-4">
+                  Manage subjects
+                </Button>
+              </Link>
+            )}
+          </div>
+        ) : !hasSchedule ? (
+          <ScheduleGenerator planId={id} />
+        ) : (
+          <ScheduleWithDialogs
+            planId={id}
+            slots={slots.map((s) => ({
+              id: s.id,
+              topicId: s.topicId ?? "",
+              date: s.date,
+              type: s.type as "study" | "buffer" | "catch-up" | "revision-7d" | "revision-30d",
+              estimatedMinutes: s.estimatedMinutes ?? 0,
+              isCompleted: s.isCompleted,
+              topicTitle: s.topicTitle ?? undefined,
+              subjectName: s.subjectName ?? undefined,
+              subjectColor: s.subjectColor ?? undefined,
+            }))}
+            startDate={plan.startDate}
+            deadline={plan.deadline}
+            hasStaleInputs={hasStaleInputs}
+          />
+        )}
+      </section>
     </div>
   );
 }

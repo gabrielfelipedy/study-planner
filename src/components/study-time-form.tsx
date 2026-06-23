@@ -105,7 +105,7 @@ export function StudyTimeForm({
             </button>
           ))}
         </div>
-        <p className="text-xs text-zinc-500">
+        <p className="text-xs text-muted-foreground">
           Select the days you typically study each week
         </p>
       </div>

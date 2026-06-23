@@ -114,7 +114,7 @@ export function TopicList({ subjectId, initialTopics, userId }: TopicListProps) 
             >
               Delete {selectedIds.size > 0 ? `(${selectedIds.size})` : ""}
             </Button>
-            <span className="text-xs text-zinc-500">
+            <span className="text-xs text-muted-foreground">
               {selectedIds.size} selected
             </span>
           </>
@@ -126,7 +126,7 @@ export function TopicList({ subjectId, initialTopics, userId }: TopicListProps) 
       </div>
 
       {sortedTopics.length === 0 ? (
-        <p className="py-8 text-center text-sm text-zinc-500">
+        <p className="py-8 text-center text-sm text-muted-foreground">
           No topics yet. Add some using the textarea below.
         </p>
       ) : (

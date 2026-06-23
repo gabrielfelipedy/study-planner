@@ -57,11 +57,9 @@ export function SubjectForm({ mode, initialData, userId }: SubjectFormProps) {
         return;
       }
       router.push("/subjects");
-      router.refresh();
     } else if (initialData) {
       await updateSubject(initialData.id, userId, { name: name.trim(), color });
       router.push("/subjects");
-      router.refresh();
     }
   }
 

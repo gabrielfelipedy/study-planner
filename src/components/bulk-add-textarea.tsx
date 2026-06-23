@@ -49,7 +49,7 @@ export function BulkAddTextarea({ subjectId, onAdd }: BulkAddTextareaProps) {
         <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
       )}
       <div className="flex items-center justify-between">
-        <span className="text-xs text-zinc-500">
+        <span className="text-xs text-muted-foreground">
           {lines.length > 0
             ? `${lines.length} topic${lines.length === 1 ? "" : "s"} to add`
             : "Paste one topic per line"}
