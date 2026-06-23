@@ -11,16 +11,23 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { archiveSubject } from "@/lib/dal/commands/subjects";
 import { useState } from "react";
 
 type ArchiveDialogProps = {
-  subjectId: string;
-  subjectName: string;
+  itemId: string;
+  itemName: string;
+  itemType: "subject" | "plan";
   userId: string;
+  redirectTo: string;
 };
 
-export function ArchiveDialog({ subjectId, subjectName, userId }: ArchiveDialogProps) {
+export function ArchiveDialog({
+  itemId,
+  itemName,
+  itemType,
+  userId,
+  redirectTo,
+}: ArchiveDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,12 +35,18 @@ export function ArchiveDialog({ subjectId, subjectName, userId }: ArchiveDialogP
   async function handleArchive() {
     setError(null);
     try {
-      await archiveSubject(subjectId, userId);
+      if (itemType === "subject") {
+        const { archiveSubject } = await import("@/lib/dal/commands/subjects");
+        await archiveSubject(itemId, userId);
+      } else {
+        const { archivePlan } = await import("@/lib/dal/commands/plans");
+        await archivePlan(itemId, userId);
+      }
       setOpen(false);
-      router.push("/subjects");
+      router.push(redirectTo);
       router.refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to archive subject");
+      setError(e instanceof Error ? e.message : "Failed to archive");
     }
   }
 
@@ -41,15 +54,15 @@ export function ArchiveDialog({ subjectId, subjectName, userId }: ArchiveDialogP
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" className="text-red-600 hover:text-red-700">
-          Archive subject
+          Archive {itemType}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Archive &ldquo;{subjectName}&rdquo;?</DialogTitle>
+          <DialogTitle>Archive &ldquo;{itemName}&rdquo;?</DialogTitle>
           <DialogDescription>
-            This subject and its topics will be archived and hidden from your main view.
-            You can restore it later by contacting support.
+            This {itemType} will be archived and hidden from your main view.
+            You can restore it later.
           </DialogDescription>
         </DialogHeader>
         {error && (

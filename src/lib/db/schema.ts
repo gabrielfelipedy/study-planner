@@ -57,11 +57,14 @@ export const studyPlans = sqliteTable("study_plans", {
   deadline: text("deadline").notNull(), // ISO date string
   startDate: text("start_date").notNull(), // ISO date string
   hoursPerDay: real("hours_per_day"),
+  hoursPerWeek: real("hours_per_week"),
+  studyDays: text("study_days"), // comma-separated day numbers, 0=Sun, 1=Mon...6=Sat
   totalTopics: integer("total_topics").default(0),
   completedTopics: integer("completed_topics").default(0), // denormalized for fast reads
-  status: text("status").default("active"), // "active" | "completed" | "paused"
+  status: text("status").default("active"), // "active" | "completed" | "paused" | "archived"
   createdAt: text("created_at").notNull().default(sql`(current_timestamp)`),
   updatedAt: text("updated_at").notNull().default(sql`(current_timestamp)`),
+  archivedAt: text("archived_at"),
 });
 
 // ── Plan Topics (join table) ───────────────────────

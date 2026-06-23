@@ -45,9 +45,11 @@ export default async function SubjectDetailPage({
               <Button variant="outline" size="sm">Edit</Button>
             </Link>
             <ArchiveDialog
-              subjectId={id}
-              subjectName={subject.name}
+              itemId={id}
+              itemName={subject.name}
+              itemType="subject"
               userId={session.user.id}
+              redirectTo="/subjects"
             />
           </div>
         </div>
