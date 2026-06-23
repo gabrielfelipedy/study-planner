@@ -5,7 +5,10 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ArrowRight } from "lucide-react";
+import { differenceInDays } from "date-fns";
 import { getPlanById } from "@/lib/dal/queries/plans";
+import { regenerateScheduleAction } from "./actions";
 import { getScheduleSlots } from "@/lib/dal/queries/calendar";
 import { StudyTimeForm } from "@/components/study-time-form";
 import { ArchiveDialog } from "@/components/archive-dialog";
@@ -39,6 +42,12 @@ export default async function PlanDetailPage({
   const deadlineDate = new Date(plan.deadline);
   const startDate = new Date(plan.startDate);
 
+  const today = new Date();
+  const daysSinceStart = differenceInDays(today, startDate) + 1;
+  const totalDays = differenceInDays(deadlineDate, startDate) + 1;
+  const expectedCompletions = Math.round((daysSinceStart / totalDays) * plan.totalTopics);
+  const behindBy = Math.max(0, expectedCompletions - (plan.completedTopics ?? 0));
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
       <div className="mb-8">
@@ -53,6 +62,20 @@ export default async function PlanDetailPage({
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Link href={`/plans/${id}/study`}>
+              <Button size="sm" className="gap-1.5">
+                Study session
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            <form
+              action={async () => { await regenerateScheduleAction(id); }}
+              className="inline"
+            >
+              <Button type="submit" variant="outline" size="sm">
+                Regenerate from today
+              </Button>
+            </form>
             <Link href={`/plans/${id}/edit`}>
               <Button variant="outline" size="sm">Edit</Button>
             </Link>
@@ -87,6 +110,13 @@ export default async function PlanDetailPage({
               }}
             />
           </div>
+          {behindBy > 0 && (
+            <div className="mt-2 flex items-center gap-2 text-sm">
+              <span className="rounded bg-amber-950/30 px-2 py-0.5 text-xs font-medium text-amber-500">
+                {behindBy} topic{behindBy === 1 ? "" : "s"} behind schedule
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
