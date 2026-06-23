@@ -107,7 +107,7 @@ export const getPlanById = cache(async (planId: string, userId: string): Promise
 });
 
 export const getPlanForEdit = cache(async (planId: string, userId: string) => {
-  return db
+  const plan = await db
     .select({
       id: studyPlans.id,
       title: studyPlans.title,
@@ -118,6 +118,19 @@ export const getPlanForEdit = cache(async (planId: string, userId: string) => {
     .from(studyPlans)
     .where(and(eq(studyPlans.id, planId), eq(studyPlans.userId, userId)))
     .get();
+
+  if (!plan) return null;
+
+  const subjectRows = await db
+    .select({ subjectId: topics.subjectId })
+    .from(planTopics)
+    .innerJoin(topics, eq(topics.id, planTopics.topicId))
+    .where(eq(planTopics.planId, planId))
+    .all();
+
+  const subjectIds = [...new Set(subjectRows.map((r) => r.subjectId))];
+
+  return { ...plan, subjectIds };
 });
 
 export type TopicForScheduler = {

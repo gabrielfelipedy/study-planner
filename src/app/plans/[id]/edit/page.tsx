@@ -42,7 +42,7 @@ export default async function EditPlanPage({
               title: plan.title,
               deadline: plan.deadline,
               startDate: plan.startDate,
-              selectedSubjectIds: [],
+              selectedSubjectIds: plan.subjectIds,
             }}
           />
         </CardContent>
