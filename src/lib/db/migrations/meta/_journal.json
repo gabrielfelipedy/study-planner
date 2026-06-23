@@ -36,6 +36,13 @@
       "when": 1782255705000,
       "tag": "0004_add_fsrs_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1782257950000,
+      "tag": "0005_add_is_manual",
+      "breakpoints": true
     }
   ]
 }

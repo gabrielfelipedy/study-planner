@@ -105,6 +105,7 @@ export const scheduleSlots = sqliteTable(
     estimatedMinutes: integer("estimated_minutes"),
     isCompleted: integer("is_completed", { mode: "boolean" }).default(false),
     completedAt: text("completed_at"),
+    isManual: integer("is_manual", { mode: "boolean" }).default(false),
     createdAt: text("created_at").notNull().default(sql`(current_timestamp)`),
   },
   (table) => ({
