@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import {
   createSubject as dalCreateSubject,
   updateSubject as dalUpdateSubject,
@@ -31,7 +32,11 @@ export async function createTopics(subjectId: string, titles: string[]) {
 }
 
 export async function deleteTopics(topicIds: string[]) {
-  return dalDeleteTopics(topicIds);
+  const planIds = await dalDeleteTopics(topicIds);
+  for (const planId of planIds) {
+    revalidatePath(`/plans/${planId}`);
+  }
+  revalidatePath(`/subjects/[id]`, "page");
 }
 
 export async function reorderTopics(
@@ -50,5 +55,8 @@ export async function updateTopic(
 }
 
 export async function deleteTopic(topicId: string) {
-  return dalDeleteTopic(topicId);
+  const planIds = await dalDeleteTopic(topicId);
+  for (const planId of planIds) {
+    revalidatePath(`/plans/${planId}`);
+  }
 }

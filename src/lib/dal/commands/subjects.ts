@@ -147,19 +147,27 @@ export async function updateTopic(
     .where(eq(topics.id, topicId));
 }
 
-export async function deleteTopic(topicId: string): Promise<void> {
+export async function deleteTopic(topicId: string): Promise<string[]> {
   const existing = await db.select().from(topics).where(eq(topics.id, topicId)).get();
   if (!existing) throw new Error("Topic not found");
+
+  const affectedPlans = await db
+    .select({ planId: planTopics.planId })
+    .from(planTopics)
+    .where(eq(planTopics.topicId, topicId))
+    .all();
+  const planIds = [...new Set(affectedPlans.map((r) => r.planId))];
 
   await db.delete(scheduleSlots).where(eq(scheduleSlots.topicId, topicId));
   await db.delete(planTopics).where(eq(planTopics.topicId, topicId));
   await db.delete(topics).where(eq(topics.id, topicId));
+
+  return planIds;
 }
 
-export async function deleteTopics(topicIds: string[]): Promise<void> {
-  if (topicIds.length === 0) return;
+export async function deleteTopics(topicIds: string[]): Promise<string[]> {
+  if (topicIds.length === 0) return [];
 
-  // Find affected plans before deleting
   const affectedPlans = await db
     .select({ planId: planTopics.planId })
     .from(planTopics)
@@ -171,7 +179,6 @@ export async function deleteTopics(topicIds: string[]): Promise<void> {
   await db.delete(planTopics).where(inArray(planTopics.topicId, topicIds));
   await db.delete(topics).where(inArray(topics.id, topicIds));
 
-  // Update plan total topics counts
   for (const planId of planIds) {
     const count = await db
       .select({ total: sql<number>`count(*)` })
@@ -183,6 +190,8 @@ export async function deleteTopics(topicIds: string[]): Promise<void> {
       .set({ totalTopics: count?.total ?? 0, updatedAt: new Date().toISOString() })
       .where(eq(studyPlans.id, planId));
   }
+
+  return planIds;
 }
 
 export async function reorderTopics(
