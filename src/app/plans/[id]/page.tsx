@@ -138,11 +138,11 @@ export default async function PlanDetailPage({
                 : "Set your study availability and add topics to generate a schedule."}
             </p>
             {!hasStudyInputs && (
-              <Link href={`/plans/${id}/edit`}>
+              <a href="#study-time-form">
                 <Button variant="default" className="mt-4">
                   Set study time
                 </Button>
-              </Link>
+              </a>
             )}
             {!hasTopics && (
               <Link href="/subjects">

@@ -27,6 +27,10 @@ export function ScheduleGenerator({ planId }: ScheduleGeneratorProps) {
       } else {
         setState("error");
       }
+    }).catch(() => {
+      if (!mounted) return;
+      setResult({ success: false, message: "Failed to generate schedule" });
+      setState("error");
     });
     return () => { mounted = false; };
   }, [planId, router]);
