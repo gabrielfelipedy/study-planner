@@ -86,7 +86,6 @@ export function PlanForm({ mode, userId, subjects, initialData }: PlanFormProps)
 
         router.push(`/plans/${initialData.id}`);
       }
-      router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save plan");
     }
