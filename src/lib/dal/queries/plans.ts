@@ -111,3 +111,30 @@ export const getPlanForEdit = cache(async (planId: string, userId: string) => {
     .where(and(eq(studyPlans.id, planId), eq(studyPlans.userId, userId)))
     .get();
 });
+
+export type TopicForScheduler = {
+  id: string;
+  title: string;
+  estimatedHours: number;
+};
+
+export const getTopicsForPlan = cache(
+  async (planId: string): Promise<TopicForScheduler[]> => {
+    const rows = await db
+      .select({
+        id: topics.id,
+        title: topics.title,
+        estimatedHours: topics.estimatedHours,
+      })
+      .from(planTopics)
+      .innerJoin(topics, eq(topics.id, planTopics.topicId))
+      .where(eq(planTopics.planId, planId))
+      .orderBy(planTopics.sortOrder)
+      .all();
+
+    return rows.map((r) => ({
+      ...r,
+      estimatedHours: r.estimatedHours ?? 1.0,
+    }));
+  }
+);

@@ -1,14 +1,19 @@
 /**
  * Schedule mutation operations (called by the scheduler engine).
- * 
- * TODO: Implement in Phase 4 (Timetable Engine & Schedule View).
+ *
+ * saveSchedule — replaces ALL existing slots for a plan (delete + bulk insert)
+ * resetSchedule — removes all slots for a plan
  */
+
+import { db } from "@/lib/db/client";
+import { scheduleSlots } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 
 export type SlotInput = {
   planId: string;
-  topicId: string;
+  topicId: string | null; // null for buffer/catch-up slots
   date: string;
-  type: "study" | "revision-7d" | "revision-30d";
+  type: "study" | "buffer" | "catch-up";
   estimatedMinutes?: number;
 };
 
@@ -16,17 +21,29 @@ export type SlotInput = {
  * Save generated schedule slots. Replaces ALL existing slots for the plan.
  * This is called by the scheduler engine after distribution.
  */
-export async function saveSchedule(planId: string, slots: SlotInput[]): Promise<void> {
-  // TODO: 
-  // 1. Delete existing slots for plan
-  // 2. Bulk insert new slots
-  throw new Error("Not implemented — Phase 4");
+export async function saveSchedule(
+  planId: string,
+  slots: SlotInput[]
+): Promise<void> {
+  await db.delete(scheduleSlots).where(eq(scheduleSlots.planId, planId));
+
+  if (slots.length > 0) {
+    await db.insert(scheduleSlots).values(
+      slots.map((s) => ({
+        id: crypto.randomUUID(),
+        planId: s.planId,
+        topicId: s.topicId,
+        date: s.date,
+        type: s.type,
+        estimatedMinutes: s.estimatedMinutes ?? null,
+      }))
+    );
+  }
 }
 
 /**
  * Reset a plan's schedule (delete all slots) — called before regeneration.
  */
 export async function resetSchedule(planId: string): Promise<void> {
-  // TODO: db.delete(scheduleSlots).where(eq(scheduleSlots.planId, planId))
-  throw new Error("Not implemented — Phase 4");
+  await db.delete(scheduleSlots).where(eq(scheduleSlots.planId, planId));
 }
