@@ -64,6 +64,11 @@ export const studyPlans = sqliteTable("study_plans", {
   status: text("status").default("active"), // "active" | "completed" | "paused" | "archived"
   createdAt: text("created_at").notNull().default(sql`(current_timestamp)`),
   updatedAt: text("updated_at").notNull().default(sql`(current_timestamp)`),
+  lastScheduleGeneratedAt: text("last_schedule_generated_at"),
+  lastScheduleHoursPerWeek: real("last_schedule_hours_per_week"),
+  lastScheduleStudyDays: text("last_schedule_study_days"),
+  lastScheduleStartDate: text("last_schedule_start_date"),
+  lastScheduleDeadline: text("last_schedule_deadline"),
   archivedAt: text("archived_at"),
 });
 
@@ -94,10 +99,9 @@ export const scheduleSlots = sqliteTable(
       .notNull()
       .references(() => studyPlans.id, { onDelete: "cascade" }),
     topicId: text("topic_id")
-      .notNull()
       .references(() => topics.id, { onDelete: "cascade" }),
     date: text("date").notNull(), // YYYY-MM-DD
-    type: text("type").notNull().default("study"), // "study" | "revision-7d" | "revision-30d"
+    type: text("type").notNull().default("study"), // "study" | "buffer" | "catch-up" | "revision-7d" | "revision-30d"
     estimatedMinutes: integer("estimated_minutes"),
     isCompleted: integer("is_completed", { mode: "boolean" }).default(false),
     completedAt: text("completed_at"),
