@@ -8,6 +8,7 @@ import { scheduleSlots, studyPlans } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { generateSchedule } from "@/lib/dal/scheduler/distribute";
 import { saveSchedule } from "@/lib/dal/commands/schedule";
+import { adaptSchedule } from "@/lib/dal/scheduler/adapt";
 import { getPlanById, getTopicsForPlan } from "@/lib/dal/queries/plans";
 import { markTopicStudied } from "@/lib/dal/commands/progress";
 import { scheduleRevision, processReviewRating } from "@/lib/dal/scheduler/revisions";
@@ -129,7 +130,10 @@ export async function moveSlotAction(
 
   await db
     .update(scheduleSlots)
-    .set({ date: input.targetDate })
+    .set({
+      date: input.targetDate,
+      isManual: true,
+    })
     .where(eq(scheduleSlots.id, input.slotId));
 
   revalidatePath(`/plans/${planId}`);
@@ -139,7 +143,33 @@ export async function moveSlotAction(
 export async function regenerateScheduleAction(
   planId: string
 ): Promise<GenerateResult> {
-  return generateScheduleAction(planId);
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user?.id) {
+    return { success: false, message: "Not authenticated" };
+  }
+
+  const plan = await getPlanById(planId, session.user.id);
+  if (!plan) {
+    return { success: false, message: "Plan not found" };
+  }
+
+  try {
+    await adaptSchedule({ planId, userId: session.user.id });
+    revalidatePath(`/plans/${planId}`);
+
+    // Count how many topics remain after rescheduling
+    const remainingTopics = plan.totalTopics - (plan.completedTopics ?? 0);
+    return {
+      success: true,
+      totalDays: remainingTopics > 0 ? remainingTopics : 0,
+      avgTopicsPerDay: remainingTopics > 0 ? 1 : 0,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to regenerate schedule",
+    };
+  }
 }
 
 export type MarkStudiedResult = {
