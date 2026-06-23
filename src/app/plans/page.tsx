@@ -16,7 +16,7 @@ export default async function PlansPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-zinc-900">Study Plans</h1>
+        <h1 className="text-2xl font-semibold text-foreground">Study Plans</h1>
         <Link href="/plans/new">
           <Button>New plan</Button>
         </Link>
@@ -29,9 +29,9 @@ export default async function PlansPage() {
           ))}
         </div>
       ) : (
-        <div className="rounded-lg border-2 border-dashed border-zinc-200 p-12 text-center">
-          <h2 className="mb-2 text-lg font-medium text-zinc-600">No study plans yet</h2>
-          <p className="mb-6 text-sm text-zinc-500">
+        <div className="rounded-lg border-2 border-dashed border-border p-12 text-center">
+          <h2 className="mb-2 text-lg font-medium text-muted-foreground">No study plans yet</h2>
+          <p className="mb-6 text-sm text-muted-foreground">
             Create a study plan to start organizing your topics and generating a schedule.
           </p>
           <Link href="/plans/new">

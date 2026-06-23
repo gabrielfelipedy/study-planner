@@ -42,11 +42,11 @@ export function BulkAddTextarea({ subjectId, onAdd }: BulkAddTextareaProps) {
         onChange={(e) => setText(e.target.value)}
         placeholder={"Type or paste topic names, one per line:\nAlgebra\nCalculus\nGeometry"}
         rows={4}
-        className="w-full rounded-md border border-zinc-200 bg-white p-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+        className="w-full rounded-md border border-border bg-card p-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         disabled={adding}
       />
       {error && (
-        <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">{error}</div>
+        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
       )}
       <div className="flex items-center justify-between">
         <span className="text-xs text-zinc-500">

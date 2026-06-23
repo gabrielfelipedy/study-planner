@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { TopicItem } from "./topic-item";
-import { createTopics, deleteTopics, reorderTopics, updateTopic } from "@/lib/dal/commands/subjects";
+import { createTopics, deleteTopics, reorderTopics, updateTopic } from "@/lib/actions/subjects";
 
 type TopicListProps = {
   subjectId: string;

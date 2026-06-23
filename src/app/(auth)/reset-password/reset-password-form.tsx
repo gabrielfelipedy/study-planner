@@ -36,7 +36,7 @@ export function ResetPasswordForm() {
   return (
     <form action={handleSubmit} className="space-y-4">
           {error && (
-            <p className="text-sm text-red-600">{error}</p>
+            <p className="text-sm text-destructive">{error}</p>
           )}
       <div className="space-y-2">
         <Label htmlFor="password">New password</Label>

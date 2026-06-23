@@ -34,23 +34,23 @@ export function ScheduleDayCell({
   const hasCatchUp = bufferSlots.some((s) => s.type === "catch-up");
   const hasBuffer = bufferSlots.some((s) => s.type === "buffer");
 
-  let cellClasses = "min-h-[120px] border-r border-b border-zinc-200 p-2 transition-colors";
-  if (isToday) cellClasses += " bg-violet-50 border-b-2 border-violet-400";
-  else if (isOver) cellClasses += " bg-violet-50/50 ring-1 ring-violet-300";
+  let cellClasses = "min-h-[120px] border-r border-b border-border p-2 transition-colors";
+  if (isToday) cellClasses += " bg-accent border-b-2 border-primary";
+  else if (isOver) cellClasses += " bg-accent/50 ring-1 ring-ring";
   else if (isPast) cellClasses += " opacity-60";
-  else if (!isStudyDay) cellClasses += " bg-zinc-50";
+  else if (!isStudyDay) cellClasses += " bg-muted/20";
 
   let catchUpStyle = "";
   if (hasCatchUp) {
-    cellClasses += " bg-amber-50/50";
-    catchUpStyle = " border-t-2 border-t-amber-200 border-dashed";
+    cellClasses += " bg-amber-950/30";
+    catchUpStyle = " border-t-2 border-t-amber-600 border-dashed";
   } else if (hasBuffer) {
-    cellClasses += " bg-zinc-50/50";
+    cellClasses += " bg-muted/20";
   }
 
   return (
     <div ref={setNodeRef} className={cellClasses + catchUpStyle}>
-      <div className="mb-1 text-center text-xs text-zinc-400">
+      <div className="mb-1 text-center text-xs text-muted-foreground">
         {format(date, "d")}
       </div>
       <SortableContext items={studySlots.map((s) => s.id)} strategy={verticalListSortingStrategy}>
@@ -59,10 +59,10 @@ export function ScheduleDayCell({
         ))}
       </SortableContext>
       {hasCatchUp && (
-        <div className="mt-1 text-center text-xs font-medium text-amber-600">Catch-up</div>
+        <div className="mt-1 text-center text-xs font-medium text-amber-500">Catch-up</div>
       )}
       {hasBuffer && !hasCatchUp && (
-        <div className="mt-1 text-center text-xs italic text-zinc-400">Buffer</div>
+        <div className="mt-1 text-center text-xs italic text-muted-foreground">Buffer</div>
       )}
     </div>
   );

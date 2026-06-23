@@ -63,7 +63,7 @@ export function RegenerateDialog({
           </DialogDescription>
         </DialogHeader>
         {error && (
-          <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">{error}</div>
+          <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
         )}
         <DialogFooter className="flex gap-2 sm:justify-between">
           <Button variant="outline" onClick={handleKeep} disabled={saving}>

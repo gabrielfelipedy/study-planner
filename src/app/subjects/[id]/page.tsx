@@ -38,7 +38,7 @@ export default async function SubjectDetailPage({
               className="h-5 w-5 rounded-full"
               style={{ backgroundColor: subject.color ?? "#3b82f6" }}
             />
-            <h1 className="text-2xl font-semibold text-zinc-900">{subject.name}</h1>
+            <h1 className="text-2xl font-semibold text-foreground">{subject.name}</h1>
           </div>
           <div className="flex items-center gap-2">
             <Link href={`/subjects/${id}/edit`}>
@@ -53,7 +53,7 @@ export default async function SubjectDetailPage({
             />
           </div>
         </div>
-        <p className="mt-1 text-sm text-zinc-500">
+        <p className="mt-1 text-sm text-muted-foreground">
           {subject.topics.length} topic{subject.topics.length === 1 ? "" : "s"}
         </p>
       </div>
@@ -65,7 +65,7 @@ export default async function SubjectDetailPage({
           userId={session.user.id}
         />
 
-        <hr className="border-zinc-200" />
+        <hr className="border-border" />
 
         <BulkAddTextarea subjectId={id} onAdd={handleBulkAdd} />
       </div>

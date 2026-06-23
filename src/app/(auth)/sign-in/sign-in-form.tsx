@@ -33,7 +33,7 @@ export function SignInForm({ callback }: { callback?: string }) {
   return (
     <form action={handleSubmit} className="space-y-4">
           {error && (
-            <p className="text-sm text-red-600">{error}</p>
+            <p className="text-sm text-destructive">{error}</p>
           )}
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
@@ -44,16 +44,16 @@ export function SignInForm({ callback }: { callback?: string }) {
         <Input id="password" name="password" type="password" required />
       </div>
       <div className="text-sm">
-        <Link href="/forgot-password" className="text-violet-600 hover:underline">
+        <Link href="/forgot-password" className="text-primary hover:underline">
           Forgot password?
         </Link>
       </div>
       <Button type="submit" className="w-full">
         Sign in
       </Button>
-      <p className="text-center text-sm text-zinc-500">
+      <p className="text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{" "}
-        <Link href="/sign-up" className="text-violet-600 hover:underline">
+        <Link href="/sign-up" className="text-primary hover:underline">
           Sign up
         </Link>
       </p>

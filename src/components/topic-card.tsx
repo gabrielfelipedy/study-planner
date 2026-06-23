@@ -36,13 +36,13 @@ export function TopicCard({ slot, isDragOverlay = false }: TopicCardProps) {
 
   if (isDragOverlay) {
     return (
-      <div className="mb-1 rounded-md border bg-white p-1.5 shadow-lg opacity-90 rotate-1 scale-105 ring-1 ring-zinc-200 pointer-events-none">
+      <div className="mb-1 rounded-md border bg-card p-1.5 shadow-lg opacity-90 rotate-1 scale-105 ring-1 ring-border pointer-events-none">
         <div className="flex items-center gap-1.5">
           {slot.subjectColor && (
             <div className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: slot.subjectColor }} />
           )}
-          <span className="truncate text-xs font-medium text-zinc-900">{slot.title ?? "Study"}</span>
-          <span className="ml-auto text-xs text-zinc-500">{slot.estimatedMinutes}m</span>
+          <span className="truncate text-xs font-medium text-foreground">{slot.title ?? "Study"}</span>
+          <span className="ml-auto text-xs text-muted-foreground">{slot.estimatedMinutes}m</span>
         </div>
       </div>
     );
@@ -54,16 +54,16 @@ export function TopicCard({ slot, isDragOverlay = false }: TopicCardProps) {
       style={style}
       {...attributes}
       {...listeners}
-      className={`mb-1 flex items-center gap-1.5 rounded-md border bg-white p-1.5 text-xs transition-colors hover:bg-zinc-50 cursor-grab active:cursor-grabbing ${isDragging ? "opacity-30" : ""} ${slot.isCompleted ? "opacity-60" : ""}`}
+      className={`mb-1 flex items-center gap-1.5 rounded-md border bg-card p-1.5 text-xs transition-colors hover:bg-muted/50 cursor-grab active:cursor-grabbing ${isDragging ? "opacity-30" : ""} ${slot.isCompleted ? "opacity-60" : ""}`}
       aria-roledescription="draggable topic"
       aria-label={`Topic: ${slot.title ?? "Study"}, Duration: ${slot.estimatedMinutes} minutes`}
     >
       {slot.subjectColor && (
         <div className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: slot.subjectColor }} />
       )}
-      <span className="truncate flex-1 text-xs font-medium text-zinc-900">{slot.title ?? "Study"}</span>
+      <span className="truncate flex-1 text-xs font-medium text-foreground">{slot.title ?? "Study"}</span>
       <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Pending</Badge>
-      <span className="text-xs text-zinc-500">{slot.estimatedMinutes}m</span>
+      <span className="text-xs text-muted-foreground">{slot.estimatedMinutes}m</span>
     </div>
   );
 }

@@ -69,7 +69,7 @@ Plans:
 - [ ] 03-02-PLAN.md — Topic management: DAL (bulk create, reorder, batch delete), subject detail page with inline list, bulk add, inline edit, drag-drop, select mode
 - [ ] 03-03-PLAN.md — Study plan management: schema (hoursPerWeek, studyDays, archived), plan DAL, nav link, plan pages, study time input
 
-### Phase 4: Timetable Engine & Schedule View
+### Phase 4: Timetable Engine & Schedule View ✓
 **Goal**: App generates a usable daily study schedule from topics, deadline, and available time
 **Depends on**: Phase 3
 **Requirements**: TIME-01, TIME-03, PROG-03
@@ -79,8 +79,14 @@ Plans:
   3. User can see their scheduled topics in a daily/weekly schedule view (in-app calendar)
   4. User can manually reschedule or drag topics to different days
   5. Schedule includes buffer blocks (~30% unscheduled time) and catch-up days to prevent rigidity
-**Plans**: TBD
+**Plans**: 4 plans (3 waves)
 **UI hint**: yes
+
+Plans:
+- [ ] 04-01-PLAN.md — Infrastructure & schema: install dnd-kit, vitest config, DB migration
+- [ ] 04-02-PLAN.md — Scheduler engine & DAL: distribute.ts algorithm, schedule commands/queries
+- [ ] 04-03-PLAN.md — Calendar UI components: topic-card, day-cell, calendar grid, dialogs
+- [ ] 04-04-PLAN.md — Server Actions & page integration: generate/move actions, plan detail page
 
 ### Phase 5: Study Sessions & Progress Tracking
 **Goal**: Users can log study activity and see their completion progress
@@ -140,7 +146,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 1. Foundation & Data Model | 4/4 | ✓ Complete | 2026-06-22 |
 | 2. Authentication | 1/1 | ✓ Complete | 2026-06-22 |
 | 3. Subject & Topic Management | 0/3 | Planning | - |
-| 4. Timetable Engine & Schedule View | 0/0 | Not started | - |
+| 4. Timetable Engine & Schedule View | 0/4 | Planned | - |
 | 5. Study Sessions & Progress Tracking | 0/0 | Not started | - |
 | 6. Revision Scheduling | 0/0 | Not started | - |
 | 7. Adaptive Rescheduling | 0/0 | Not started | - |

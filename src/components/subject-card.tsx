@@ -6,7 +6,7 @@ export function SubjectCard({ subject }: { subject: SubjectSummary }) {
   return (
     <Link
       href={`/subjects/${subject.id}`}
-      className="group block rounded-lg border bg-white p-5 shadow-sm transition hover:shadow-md"
+      className="group block rounded-lg border bg-card p-5 shadow-sm transition hover:shadow-md"
     >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
@@ -15,7 +15,7 @@ export function SubjectCard({ subject }: { subject: SubjectSummary }) {
             style={{ backgroundColor: subject.color ?? "#3b82f6" }}
             aria-label={`Color: ${subject.color}`}
           />
-          <h3 className="font-medium text-zinc-900">{subject.name}</h3>
+          <h3 className="font-medium text-foreground">{subject.name}</h3>
         </div>
         <Badge variant="secondary" className="shrink-0">
           {subject.topicCount} topic{subject.topicCount === 1 ? "" : "s"}

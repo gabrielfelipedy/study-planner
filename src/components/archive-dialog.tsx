@@ -53,7 +53,7 @@ export function ArchiveDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="text-red-600 hover:text-red-700">
+        <Button variant="outline" className="text-destructive hover:text-destructive/80">
           Archive {itemType}
         </Button>
       </DialogTrigger>
@@ -66,7 +66,7 @@ export function ArchiveDialog({
           </DialogDescription>
         </DialogHeader>
         {error && (
-          <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">{error}</div>
+          <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
         )}
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>

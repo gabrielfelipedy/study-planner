@@ -11,8 +11,8 @@ export function GenerateSpinner({
 }: GenerateSpinnerProps) {
   return (
     <div className="flex items-center justify-center gap-3 py-12">
-      <Loader2 className="h-5 w-5 animate-spin text-violet-600" />
-      <p className="text-sm text-zinc-600">{message}</p>
+      <Loader2 className="h-5 w-5 animate-spin text-primary" />
+      <p className="text-sm text-muted-foreground">{message}</p>
     </div>
   );
 }

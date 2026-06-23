@@ -29,12 +29,12 @@ export function TopicItem({
       onDragStart={(e) => onDragStart(e, topic.sortOrder)}
       onDragOver={(e) => onDragOver(e, topic.sortOrder)}
       onDrop={(e) => onDrop(e, topic.sortOrder)}
-      className={`flex items-center gap-3 rounded-md border bg-white px-4 py-2.5 transition ${
-        isSelected ? "border-violet-400 bg-violet-50" : "border-zinc-200"
+      className={`flex items-center gap-3 rounded-md border bg-card px-4 py-2.5 transition ${
+        isSelected ? "border-primary bg-accent" : "border-border"
       } ${!selectMode ? "cursor-grab active:cursor-grabbing" : ""}`}
     >
       {!selectMode && (
-        <span className="text-zinc-400 select-none" aria-hidden="true">
+        <span className="text-muted-foreground select-none" aria-hidden="true">
           ⠿
         </span>
       )}
@@ -44,7 +44,7 @@ export function TopicItem({
           type="checkbox"
           checked={isSelected}
           onChange={() => onToggleSelect(topic.id)}
-          className="h-4 w-4 rounded border-zinc-300 text-violet-600"
+          className="h-4 w-4 rounded border-border text-primary"
         />
       )}
 

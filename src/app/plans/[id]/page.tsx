@@ -29,8 +29,8 @@ export default async function PlanDetailPage({
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-zinc-900">{plan.title}</h1>
-            <div className="mt-1 flex items-center gap-3 text-sm text-zinc-500">
+            <h1 className="text-2xl font-semibold text-foreground">{plan.title}</h1>
+            <div className="mt-1 flex items-center gap-3 text-sm text-muted-foreground">
               <span>{startDate.toLocaleDateString()} → {deadlineDate.toLocaleDateString()}</span>
               <Badge variant={plan.status === "active" ? "default" : "secondary"}>
                 {plan.status}
@@ -53,18 +53,18 @@ export default async function PlanDetailPage({
 
         <div className="mt-4">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-zinc-600">
+            <span className="text-muted-foreground">
               {plan.completedTopics} / {plan.totalTopics} topics completed
             </span>
-            <span className="font-medium text-zinc-900">
+            <span className="font-medium text-foreground">
               {plan.totalTopics > 0
                 ? `${Math.round((plan.completedTopics / plan.totalTopics) * 100)}%`
                 : "No topics"}
             </span>
           </div>
-          <div className="mt-1 h-2 w-full rounded-full bg-zinc-200">
+          <div className="mt-1 h-2 w-full rounded-full bg-muted">
             <div
-              className="h-2 rounded-full bg-violet-600 transition-all"
+              className="h-2 rounded-full bg-primary transition-all"
               style={{
                 width: plan.totalTopics > 0
                   ? `${(plan.completedTopics / plan.totalTopics) * 100}%`
@@ -76,29 +76,29 @@ export default async function PlanDetailPage({
       </div>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-lg font-medium text-zinc-900">Subjects</h2>
+        <h2 className="mb-3 text-lg font-medium text-foreground">Subjects</h2>
         {plan.subjects.length > 0 ? (
           <div className="space-y-2">
             {plan.subjects.map((subject) => (
               <div
                 key={subject.id}
-                className="flex items-center gap-3 rounded-md border bg-white px-4 py-3"
+                className="flex items-center gap-3 rounded-md border bg-card px-4 py-3"
               >
                 <div
                   className="h-3 w-3 rounded-full"
                   style={{ backgroundColor: subject.color ?? "#3b82f6" }}
                 />
-                <span className="flex-1 text-sm font-medium text-zinc-900">
+                <span className="flex-1 text-sm font-medium text-foreground">
                   {subject.name}
                 </span>
-                <span className="text-xs text-zinc-500">
+                <span className="text-xs text-muted-foreground">
                   {subject.topicCount} topic{subject.topicCount === 1 ? "" : "s"}
                 </span>
               </div>
             ))}
           </div>
         ) : (
-          <p className="rounded-md bg-zinc-50 p-4 text-sm text-zinc-500">
+          <p className="rounded-md bg-muted p-4 text-sm text-muted-foreground">
             No subjects added yet.
           </p>
         )}
@@ -111,8 +111,8 @@ export default async function PlanDetailPage({
         initialStudyDays={plan.studyDays}
       />
 
-      <div className="mt-8 rounded-lg border-2 border-dashed border-zinc-200 p-8 text-center">
-        <p className="text-sm text-zinc-500">
+      <div className="mt-8 rounded-lg border-2 border-dashed border-border p-8 text-center">
+        <p className="text-sm text-muted-foreground">
           Schedule generation will appear here in Phase 4.
         </p>
       </div>

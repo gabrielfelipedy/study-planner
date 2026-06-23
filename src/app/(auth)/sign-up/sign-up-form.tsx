@@ -40,7 +40,7 @@ export function SignUpForm() {
   return (
     <form action={handleSubmit} className="space-y-4">
           {error && (
-            <p className="text-sm text-red-600">{error}</p>
+            <p className="text-sm text-destructive">{error}</p>
           )}
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
@@ -54,7 +54,7 @@ export function SignUpForm() {
         <Label htmlFor="confirmPassword">Confirm password</Label>
         <Input id="confirmPassword" name="confirmPassword" type="password" required />
       </div>
-      <Link href="/sign-in" className="text-sm text-violet-600 hover:underline">
+      <Link href="/sign-in" className="text-sm text-primary hover:underline">
         Already have an account? Sign in
       </Link>
       <Button type="submit" className="w-full">

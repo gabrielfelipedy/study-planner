@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { createPlan, updatePlan, addSubjectToPlan, removeSubjectFromPlan } from "@/lib/dal/commands/plans";
+import { createPlan, updatePlan, addSubjectToPlan, removeSubjectFromPlan } from "@/lib/actions/plans";
 import { useState } from "react";
 
 type SubjectOption = {
@@ -97,7 +97,7 @@ export function PlanForm({ mode, userId, subjects, initialData }: PlanFormProps)
   return (
     <form action={handleSubmit} className="space-y-6">
       {error && (
-        <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">{error}</div>
+        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
       )}
 
       <div className="space-y-2">
@@ -137,14 +137,14 @@ export function PlanForm({ mode, userId, subjects, initialData }: PlanFormProps)
 
       <div className="space-y-2">
         <Label>Subjects</Label>
-        <p className="text-xs text-zinc-500">
+        <p className="text-xs text-muted-foreground">
           Select subjects to include. All topics under selected subjects will be
           added to this plan.
         </p>
         {subjects.length === 0 ? (
-          <p className="rounded-md bg-zinc-50 p-3 text-sm text-zinc-500">
+          <p className="rounded-md bg-muted p-3 text-sm text-muted-foreground">
             No subjects available.{" "}
-            <a href="/subjects/new" className="text-violet-600 hover:underline">
+            <a href="/subjects/new" className="text-primary hover:underline">
               Create a subject
             </a>{" "}
             first.
@@ -154,7 +154,7 @@ export function PlanForm({ mode, userId, subjects, initialData }: PlanFormProps)
             {subjects.map((subject) => (
               <label
                 key={subject.id}
-                className="flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 hover:bg-zinc-50"
+                className="flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 hover:bg-muted/50"
               >
                 <Checkbox
                   checked={selectedIds.has(subject.id)}
@@ -164,10 +164,10 @@ export function PlanForm({ mode, userId, subjects, initialData }: PlanFormProps)
                   className="h-3 w-3 rounded-full shrink-0"
                   style={{ backgroundColor: subject.color ?? "#3b82f6" }}
                 />
-                <span className="flex-1 text-sm font-medium text-zinc-900">
+                <span className="flex-1 text-sm font-medium text-foreground">
                   {subject.name}
                 </span>
-                <span className="text-xs text-zinc-500">
+                <span className="text-xs text-muted-foreground">
                   {subject.topicCount} topic{subject.topicCount === 1 ? "" : "s"}
                 </span>
               </label>

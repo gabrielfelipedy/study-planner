@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { updatePlan } from "@/lib/dal/commands/plans";
+import { updatePlan } from "@/lib/actions/plans";
 import { useState } from "react";
 
 const DAYS_OF_WEEK = [
@@ -66,11 +66,11 @@ export function StudyTimeForm({
   }
 
   return (
-    <div className="space-y-4 rounded-lg border bg-white p-4">
-      <h3 className="font-medium text-zinc-900">Study Availability</h3>
+    <div className="space-y-4 rounded-lg border bg-card p-4">
+      <h3 className="font-medium text-foreground">Study Availability</h3>
 
       {error && (
-        <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">{error}</div>
+        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
       )}
 
       <div className="space-y-2">
@@ -97,8 +97,8 @@ export function StudyTimeForm({
               onClick={() => toggleDay(day.value)}
               className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
                 selectedDays.has(day.value)
-                  ? "bg-violet-600 text-white"
-                  : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
               }`}
             >
               {day.label}

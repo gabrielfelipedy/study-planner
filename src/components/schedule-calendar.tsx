@@ -211,15 +211,15 @@ export function ScheduleCalendar({
 
       {isStale && (
         <div
-          className="flex items-start gap-2 rounded-md bg-amber-50 p-3 text-sm text-amber-800"
+          className="flex items-start gap-2 rounded-md bg-amber-950/30 p-3 text-sm text-amber-400"
           role="alert"
         >
-          <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+          <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
           <div className="flex-1">
             Schedule may not match your current settings —{" "}
             <Button
               variant="link"
-              className="h-auto p-0 text-amber-800 underline"
+              className="h-auto p-0 text-amber-400 underline"
             >
               regenerate to update
             </Button>
@@ -228,7 +228,7 @@ export function ScheduleCalendar({
       )}
 
       {moveError && (
-        <div className="rounded-md bg-red-50 p-3 text-sm text-red-600" role="alert">
+        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive" role="alert">
           {moveError}
         </div>
       )}
@@ -251,10 +251,10 @@ export function ScheduleCalendar({
                 <div
                   key={weekId}
                   ref={isCurrentWeek ? todayRef : undefined}
-                  className={`scroll-mt-20 ${isCurrentWeek ? "bg-violet-50/30" : ""}`}
+                  className={`scroll-mt-20 ${isCurrentWeek ? "bg-accent/30" : ""}`}
                 >
                   {/* Day header row */}
-                  <div className="grid grid-cols-7 border-b text-center text-xs font-medium text-zinc-500">
+                  <div className="grid grid-cols-7 border-b border-border text-center text-xs font-medium text-muted-foreground">
                     {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
                       (name) => (
                         <div key={name} className="py-1">

@@ -65,7 +65,7 @@ export function InlineEdit({ value, onSave, className }: InlineEditProps) {
 
   return (
     <span
-      className={`cursor-pointer rounded px-1 hover:bg-zinc-100 ${className ?? ""}`}
+      className={`cursor-pointer rounded px-1 hover:bg-muted/50 ${className ?? ""}`}
         onClick={() => { setDraft(value); setEditing(true); }}
       title="Click to rename"
     >

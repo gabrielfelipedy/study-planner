@@ -16,7 +16,7 @@ export default async function SubjectsPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-zinc-900">My Subjects</h1>
+        <h1 className="text-2xl font-semibold text-foreground">My Subjects</h1>
         <Link href="/subjects/new">
           <Button>New subject</Button>
         </Link>
@@ -29,9 +29,9 @@ export default async function SubjectsPage() {
           ))}
         </div>
       ) : (
-        <div className="rounded-lg border-2 border-dashed border-zinc-200 p-12 text-center">
-          <h2 className="mb-2 text-lg font-medium text-zinc-600">No subjects yet</h2>
-          <p className="mb-6 text-sm text-zinc-500">
+        <div className="rounded-lg border-2 border-dashed border-border p-12 text-center">
+          <h2 className="mb-2 text-lg font-medium text-muted-foreground">No subjects yet</h2>
+          <p className="mb-6 text-sm text-muted-foreground">
             Create your first subject to start organizing your study material.
           </p>
           <Link href="/subjects/new">
