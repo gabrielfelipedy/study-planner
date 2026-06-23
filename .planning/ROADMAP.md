@@ -110,11 +110,15 @@ Plans:
 **Depends on**: Phase 5
 **Requirements**: TIME-02
 **Success Criteria** (what must be TRUE):
-  1. After marking a topic as studied, revision slots appear on the schedule at appropriate intervals
-  2. User can see revision slots visually distinguished from new study slots in the schedule view
-  3. Revision intervals use spaced repetition (FSRS) — intervals adapt based on review rating (Again/Hard/Good/Easy)
-**Plans**: TBD
+   1. After marking a topic as studied, revision slots appear on the schedule at appropriate intervals
+   2. User can see revision slots visually distinguished from new study slots in the schedule view
+   3. Revision intervals use spaced repetition (FSRS) — intervals adapt based on review rating (Again/Hard/Good/Easy)
+**Plans**: 2 plans (2 waves)
 **UI hint**: yes
+
+Plans:
+- [ ] 06-01-PLAN.md — FSRS Engine & Integration: schema columns, ts-fsrs install, scheduleRevision/processReviewRating DAL, wire into markTopicStudied, Server Actions
+- [ ] 06-02-PLAN.md — Revision UI: calendar slot styling (purple/indigo), revision-rating component (Again/Hard/Good/Easy)
 
 ### Phase 7: Adaptive Rescheduling
 **Goal**: Schedule adapts to the user's actual progress to stay achievable
@@ -152,8 +156,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 2. Authentication | 1/1 | ✓ Complete | 2026-06-22 |
 | 3. Subject & Topic Management | 3/3 | ✓ Complete | 2026-06-23 |
 | 4. Timetable Engine & Schedule View | 4/4 | ✓ Complete | 2026-06-23 |
-| 5. Study Sessions & Progress Tracking | 0/3 | Planned | - |
-| 6. Revision Scheduling | 0/0 | Not started | - |
+| 5. Study Sessions & Progress Tracking | 3/3 | ✓ Complete | 2026-06-23 |
+| 6. Revision Scheduling | 2/2 | Planned | - |
 | 7. Adaptive Rescheduling | 0/0 | Not started | - |
 | 8. Dashboard & Visualizations | 0/0 | Not started | - |
 
