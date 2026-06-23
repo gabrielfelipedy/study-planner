@@ -97,8 +97,13 @@ Plans:
   2. User can see overall progress percentage (topics completed vs planned) on the schedule view
   3. Progress percentage updates immediately after marking topics
   4. User can see which topics are completed, in progress, or pending in the schedule
-**Plans**: TBD
+**Plans**: 3 plans (2 waves)
 **UI hint**: yes
+
+Plans:
+- [ ] 05-01-PLAN.md — DAL & Server Actions: markTopicStudied command, progress queries, markTopicStudiedAction
+- [ ] 05-02-PLAN.md — Calendar inline marking: topic-card 2-step completion, toast feedback, calendar wiring
+- [ ] 05-03-PLAN.md — Session page & homepage: /plans/[id]/study checklist page, homepage today's summary
 
 ### Phase 6: Revision Scheduling
 **Goal**: App auto-schedules revision sessions at spaced intervals after topics are studied
@@ -145,9 +150,9 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 |-------|----------------|--------|-----------|
 | 1. Foundation & Data Model | 4/4 | ✓ Complete | 2026-06-22 |
 | 2. Authentication | 1/1 | ✓ Complete | 2026-06-22 |
-| 3. Subject & Topic Management | 0/3 | Planning | - |
-| 4. Timetable Engine & Schedule View | 0/4 | Planned | - |
-| 5. Study Sessions & Progress Tracking | 0/0 | Not started | - |
+| 3. Subject & Topic Management | 3/3 | ✓ Complete | 2026-06-23 |
+| 4. Timetable Engine & Schedule View | 4/4 | ✓ Complete | 2026-06-23 |
+| 5. Study Sessions & Progress Tracking | 0/3 | Planned | - |
 | 6. Revision Scheduling | 0/0 | Not started | - |
 | 7. Adaptive Rescheduling | 0/0 | Not started | - |
 | 8. Dashboard & Visualizations | 0/0 | Not started | - |
