@@ -156,6 +156,17 @@ export const revisions = sqliteTable(
     originalStudyDate: text("original_study_date"), // when topic was first studied
     scheduledDate: text("scheduled_date").notNull(), // when revision is due
     interval: integer("interval"), // days since original study
+    // FSRS memory state columns
+    stability: real("stability").notNull().default(0),
+    difficulty: real("difficulty").notNull().default(0),
+    retrievability: real("retrievability").notNull().default(1.0),
+    cardState: text("card_state").notNull().default("new"), // "new" | "learning" | "review" | "relearning"
+    elapsedDays: integer("elapsed_days").default(0),
+    scheduledDays: integer("scheduled_days").default(0),
+    reps: integer("reps").default(0),
+    lapses: integer("lapses").default(0),
+    rating: text("rating"), // "again" | "hard" | "good" | "easy" — null for initial entries
+    lastReviewAt: text("last_review_at"),
     isCompleted: integer("is_completed", { mode: "boolean" }).default(false),
     completedAt: text("completed_at"),
     createdAt: text("created_at").notNull().default(sql`(current_timestamp)`),
