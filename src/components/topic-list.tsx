@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { TopicItem } from "./topic-item";
 import { createTopics, deleteTopics, reorderTopics, updateTopic } from "@/lib/actions/subjects";
 
@@ -20,20 +21,38 @@ export function TopicList({ subjectId, initialTopics, userId }: TopicListProps) 
   const [topics, setTopics] = useState(initialTopics);
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkText, setBulkText] = useState("");
+  const [adding, setAdding] = useState(false);
+  const [bulkError, setBulkError] = useState<string | null>(null);
 
-  const handleBulkAdd = useCallback(async (_subjectId: string, titles: string[]) => {
-    const { ids } = await createTopics(subjectId, titles);
-    const startOrder = topics.length > 0
-      ? Math.max(...topics.map((t) => t.sortOrder)) + 1
-      : 1;
-    const newTopics = titles.map((title, i) => ({
-      id: ids[i] ?? "",
-      title,
-      sortOrder: startOrder + i,
-      status: "pending" as const,
-    }));
-    setTopics((prev) => [...prev, ...newTopics]);
-  }, [subjectId, topics]);
+  const bulkLines = bulkText
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+
+  const handleBulkAdd = useCallback(async () => {
+    if (bulkLines.length === 0) return;
+    setAdding(true);
+    setBulkError(null);
+    try {
+      const { ids } = await createTopics(subjectId, bulkLines);
+      const startOrder = topics.length > 0
+        ? Math.max(...topics.map((t) => t.sortOrder)) + 1
+        : 1;
+      const newTopics = bulkLines.map((title, i) => ({
+        id: ids[i] ?? "",
+        title,
+        sortOrder: startOrder + i,
+        status: "pending" as const,
+      }));
+      setTopics((prev) => [...prev, ...newTopics]);
+      setBulkText("");
+    } catch (e) {
+      setBulkError(e instanceof Error ? e.message : "Failed to create topics");
+    } finally {
+      setAdding(false);
+    }
+  }, [subjectId, topics, bulkLines]);
 
   const handleRename = useCallback(async (topicId: string, title: string) => {
     await updateTopic(topicId, userId, { title });
@@ -146,6 +165,39 @@ export function TopicList({ subjectId, initialTopics, userId }: TopicListProps) 
           ))}
         </div>
       )}
+
+      <hr className="border-border" />
+
+      <div className="space-y-3">
+        <Label htmlFor="bulk-topics">Add topics</Label>
+        <textarea
+          id="bulk-topics"
+          value={bulkText}
+          onChange={(e) => setBulkText(e.target.value)}
+          placeholder={"Type or paste topic names, one per line:\nAlgebra\nCalculus\nGeometry"}
+          rows={4}
+          className="w-full rounded-md border border-border bg-card p-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          disabled={adding}
+        />
+        {bulkError && (
+          <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{bulkError}</div>
+        )}
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-muted-foreground">
+            {bulkLines.length > 0
+              ? `${bulkLines.length} topic${bulkLines.length === 1 ? "" : "s"} to add`
+              : "Paste one topic per line"}
+          </span>
+          <Button
+            type="button"
+            onClick={handleBulkAdd}
+            disabled={bulkLines.length === 0 || adding}
+            size="sm"
+          >
+            {adding ? "Adding..." : `Add ${bulkLines.length > 0 ? bulkLines.length : "topics"}`}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

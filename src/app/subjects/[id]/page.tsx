@@ -6,9 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getSubjectById } from "@/lib/dal/queries/subjects";
 import { TopicList } from "@/components/topic-list";
-import { BulkAddTextarea } from "@/components/bulk-add-textarea";
 import { ArchiveDialog } from "@/components/archive-dialog";
-import { createTopics } from "@/lib/dal/commands/subjects";
 
 export default async function SubjectDetailPage({
   params,
@@ -21,13 +19,6 @@ export default async function SubjectDetailPage({
   const { id } = await params;
   const subject = await getSubjectById(id, session.user.id);
   if (!subject) notFound();
-
-  async function handleBulkAdd(subjectId: string, titles: string[]) {
-    "use server";
-    const session = await auth.api.getSession({ headers: await headers() });
-    if (!session?.user?.id) throw new Error("Unauthorized");
-    await createTopics(subjectId, titles);
-  }
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
@@ -58,17 +49,11 @@ export default async function SubjectDetailPage({
         </p>
       </div>
 
-      <div className="space-y-6">
-        <TopicList
-          subjectId={id}
-          initialTopics={subject.topics}
-          userId={session.user.id}
-        />
-
-        <hr className="border-border" />
-
-        <BulkAddTextarea subjectId={id} onAdd={handleBulkAdd} />
-      </div>
+      <TopicList
+        subjectId={id}
+        initialTopics={subject.topics}
+        userId={session.user.id}
+      />
     </div>
   );
 }
