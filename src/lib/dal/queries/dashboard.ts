@@ -1,6 +1,13 @@
 import { cache } from "react";
 import { db } from "@/lib/db/client";
-import { studyPlans, scheduleSlots, completions, subjects, topics, planTopics } from "@/lib/db/schema";
+import {
+  studyPlans,
+  scheduleSlots,
+  completions,
+  subjects,
+  topics,
+  planTopics,
+} from "@/lib/db/schema";
 import { eq, and, sql, inArray } from "drizzle-orm";
 import type {
   DashboardStats,
@@ -224,14 +231,12 @@ export const getSubjectDistribution = cache(async (
 });
 
 /**
- * Get weekly planned vs actual study hours for a specific plan (D-06).
- * Returns array of WeeklyStudyHours sorted by weekStart ascending.
- * REQUIRES a planId — this chart only makes sense per-plan (per D-06).
- * Groups study-type schedule slots by ISO week (Monday start).
- * Planned hours = sum of estimatedMinutes/60 for study-type slots in that week.
- * Actual hours = sum of estimatedMinutes/60 for study-type + completed slots in that week.
+ * Get weekly planned vs actual topic completion for a specific plan.
+ * Returns array of WeeklyTopicCompletion sorted by weekStart ascending.
+ * Planned topics = count of study-type schedule slots that week.
+ * Actual topics = count of completed study-type schedule slots that week.
  */
-export const getWeeklyStudyHours = cache(async (
+export const getWeeklyTopicCompletion = cache(async (
   userId: string,
   planId: string
 ): Promise<WeeklyStudyHours[]> => {
@@ -248,7 +253,6 @@ export const getWeeklyStudyHours = cache(async (
   const rows = await db
     .select({
       date: scheduleSlots.date,
-      estimatedMinutes: scheduleSlots.estimatedMinutes,
       isCompleted: scheduleSlots.isCompleted,
     })
     .from(scheduleSlots)
@@ -268,14 +272,13 @@ export const getWeeklyStudyHours = cache(async (
     const date = new Date(row.date + "T00:00:00");
     const dayOfWeek = date.getDay();
     const monday = new Date(date);
-    monday.setDate(date.getDate() - ((dayOfWeek + 6) % 7)); // ISO week: Monday start
+    monday.setDate(date.getDate() - ((dayOfWeek + 6) % 7));
     const weekStart = monday.toISOString().split("T")[0];
 
-    const minutes = row.estimatedMinutes ?? 0;
     const current = weekMap.get(weekStart) ?? { planned: 0, actual: 0 };
-    current.planned += minutes;
+    current.planned += 1;
     if (row.isCompleted) {
-      current.actual += minutes;
+      current.actual += 1;
     }
     weekMap.set(weekStart, current);
   }
@@ -283,8 +286,8 @@ export const getWeeklyStudyHours = cache(async (
   return Array.from(weekMap.entries())
     .map(([weekStart, vals]) => ({
       weekStart,
-      plannedHours: Math.round((vals.planned / 60) * 10) / 10,
-      actualHours: Math.round((vals.actual / 60) * 10) / 10,
+      plannedHours: vals.planned,
+      actualHours: vals.actual,
     }))
     .sort((a, b) => a.weekStart.localeCompare(b.weekStart));
 });
