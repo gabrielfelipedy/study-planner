@@ -21,8 +21,8 @@ export type SubjectDistribution = {
 
 export type WeeklyStudyHours = {
   weekStart: string;        // ISO date of Monday (YYYY-MM-DD)
-  plannedHours: number;     // sum of estimatedMinutes / 60 for study-type slots that week
-  actualHours: number;      // sum of estimatedMinutes / 60 for completed study-type slots that week
+  plannedHours: number;     // count of study-type slots that week
+  actualHours: number;      // count of completed study-type slots that week
 };
 
 export type RevisionAdherence = {

@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { db } from "@/lib/db/client";
 import { studyPlans, planTopics, subjects, topics } from "@/lib/db/schema";
-import { eq, and, isNull, sql } from "drizzle-orm";
+import { eq, and, isNull, sql, inArray } from "drizzle-orm";
 
 export type PlanSummary = {
   id: string;
@@ -10,19 +10,16 @@ export type PlanSummary = {
   status: string | null;
   totalTopics: number | null;
   completedTopics: number | null;
-  hoursPerWeek: number | null;
-  studyDays: string | null;
 };
 
 export type PlanWithSubjects = PlanSummary & {
   startDate: string;
-  hoursPerDay: number | null;
+  weekdays: string;
   createdAt: string;
   archivedAt: string | null;
   totalTopics: number;
   completedTopics: number;
-  lastScheduleHoursPerWeek: number | null;
-  lastScheduleStudyDays: string | null;
+  lastScheduleGeneratedAt: string | null;
   lastScheduleStartDate: string | null;
   lastScheduleDeadline: string | null;
   subjects: Array<{
@@ -42,8 +39,6 @@ export const getPlansForUser = cache(async (userId: string): Promise<PlanSummary
       status: studyPlans.status,
       totalTopics: studyPlans.totalTopics,
       completedTopics: studyPlans.completedTopics,
-      hoursPerWeek: studyPlans.hoursPerWeek,
-      studyDays: studyPlans.studyDays,
     })
     .from(studyPlans)
     .where(
@@ -93,13 +88,10 @@ export const getPlanById = cache(async (planId: string, userId: string): Promise
     totalTopics: plan.totalTopics ?? 0,
     completedTopics: plan.completedTopics ?? 0,
     startDate: plan.startDate,
-    hoursPerDay: plan.hoursPerDay,
-    hoursPerWeek: plan.hoursPerWeek,
-    studyDays: plan.studyDays,
+    weekdays: plan.weekdays ?? "1,2,3,4,5",
     createdAt: plan.createdAt,
     archivedAt: plan.archivedAt,
-    lastScheduleHoursPerWeek: plan.lastScheduleHoursPerWeek,
-    lastScheduleStudyDays: plan.lastScheduleStudyDays,
+    lastScheduleGeneratedAt: plan.lastScheduleGeneratedAt,
     lastScheduleStartDate: plan.lastScheduleStartDate,
     lastScheduleDeadline: plan.lastScheduleDeadline,
     subjects: linkedSubjects,
@@ -113,6 +105,7 @@ export const getPlanForEdit = cache(async (planId: string, userId: string) => {
       title: studyPlans.title,
       deadline: studyPlans.deadline,
       startDate: studyPlans.startDate,
+      weekdays: studyPlans.weekdays,
       status: studyPlans.status,
     })
     .from(studyPlans)
@@ -136,7 +129,6 @@ export const getPlanForEdit = cache(async (planId: string, userId: string) => {
 export type TopicForScheduler = {
   id: string;
   title: string;
-  estimatedHours: number;
 };
 
 export const getTopicsForPlan = cache(
@@ -145,7 +137,6 @@ export const getTopicsForPlan = cache(
       .select({
         id: topics.id,
         title: topics.title,
-        estimatedHours: topics.estimatedHours,
       })
       .from(planTopics)
       .innerJoin(topics, eq(topics.id, planTopics.topicId))
@@ -153,9 +144,61 @@ export const getTopicsForPlan = cache(
       .orderBy(planTopics.sortOrder)
       .all();
 
-    return rows.map((r) => ({
-      ...r,
-      estimatedHours: r.estimatedHours ?? 1.0,
-    }));
+    return rows;
+  }
+);
+
+export type SubjectSyncStatus = {
+  id: string;
+  name: string;
+  color: string | null;
+  planTopicCount: number;
+  subjectTopicCount: number;
+  isOutOfSync: boolean;
+};
+
+export const getPlanTopicSyncStatuses = cache(
+  async (planId: string): Promise<SubjectSyncStatus[]> => {
+    const planSubjects = await db
+      .select({
+        id: subjects.id,
+        name: subjects.name,
+        color: subjects.color,
+        planTopicCount: sql<number>`count(distinct ${topics.id})`,
+      })
+      .from(planTopics)
+      .innerJoin(topics, eq(topics.id, planTopics.topicId))
+      .innerJoin(subjects, eq(subjects.id, topics.subjectId))
+      .where(eq(planTopics.planId, planId))
+      .groupBy(subjects.id)
+      .all();
+
+    if (planSubjects.length === 0) return [];
+
+    const subjectCounts = await db
+      .select({
+        subjectId: topics.subjectId,
+        subjectTopicCount: sql<number>`count(*)`,
+      })
+      .from(topics)
+      .where(inArray(topics.subjectId, planSubjects.map((s) => s.id)))
+      .groupBy(topics.subjectId)
+      .all();
+
+    const countMap = new Map(
+      subjectCounts.map((r) => [r.subjectId, r.subjectTopicCount])
+    );
+
+    return planSubjects.map((s) => {
+      const subjectTopicCount = countMap.get(s.id) ?? 0;
+      return {
+        id: s.id,
+        name: s.name,
+        color: s.color,
+        planTopicCount: s.planTopicCount,
+        subjectTopicCount,
+        isOutOfSync: s.planTopicCount !== subjectTopicCount,
+      };
+    });
   }
 );

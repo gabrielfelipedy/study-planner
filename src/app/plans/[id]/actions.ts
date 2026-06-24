@@ -10,22 +10,45 @@ import { generateSchedule } from "@/lib/dal/scheduler/distribute";
 import { saveSchedule } from "@/lib/dal/commands/schedule";
 import { adaptSchedule } from "@/lib/dal/scheduler/adapt";
 import { getPlanById, getTopicsForPlan } from "@/lib/dal/queries/plans";
-import { markTopicStudied } from "@/lib/dal/commands/progress";
-import { scheduleRevision, processReviewRating } from "@/lib/dal/scheduler/revisions";
+import { updatePlan, syncSubjectTopicsInPlan, insertTopicsIntoSchedule } from "@/lib/dal/commands/plans";
+import { markTopicStudied, unmarkTopicStudied } from "@/lib/dal/commands/progress";
+import { processReviewRating } from "@/lib/dal/scheduler/revisions";
 import type { RevisionRating } from "@/lib/dal/scheduler/revisions";
-import { getCurrentRevisionState, getPendingRevisionSlots } from "@/lib/dal/queries/revisions";
+import { getCurrentRevisionState } from "@/lib/dal/queries/revisions";
 
 export type GenerateResult = {
   success: boolean;
   message?: string;
-  totalDays?: number;
-  avgTopicsPerDay?: number;
 };
 
 export type MoveSlotInput = {
   slotId: string;
   targetDate: string;
 };
+
+export async function syncSubjectTopicsAction(
+  planId: string,
+  subjectId: string
+): Promise<GenerateResult> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user?.id) {
+    return { success: false, message: "Not authenticated" };
+  }
+
+  try {
+    const { addedTopicIds } = await syncSubjectTopicsInPlan(planId, subjectId, session.user.id);
+    if (addedTopicIds.length > 0) {
+      await insertTopicsIntoSchedule(planId, addedTopicIds);
+    }
+    revalidatePath(`/plans/${planId}`);
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to sync topics",
+    };
+  }
+}
 
 export async function generateScheduleAction(
   planId: string
@@ -45,30 +68,17 @@ export async function generateScheduleAction(
     return { success: false, message: "No topics in this plan" };
   }
 
-  if (!plan.hoursPerWeek || !plan.studyDays) {
-    return { success: false, message: "Set your study availability first" };
-  }
-
-  const studyDays = plan.studyDays.split(",").map(Number).filter((d) => !isNaN(d));
-  if (studyDays.length === 0) {
-    return { success: false, message: "Select at least one study day" };
-  }
+  const weekdays = plan.weekdays
+    ? plan.weekdays.split(",").map(Number)
+    : undefined;
 
   const result = await generateSchedule({
     planId,
     topics,
     startDate: plan.startDate,
     deadline: plan.deadline,
-    hoursPerWeek: plan.hoursPerWeek ?? 10,
-    studyDays,
+    weekdays,
   });
-
-  if (!result.feasibility.possible) {
-    return {
-      success: false,
-      message: result.feasibility.message ?? "Not enough study time available",
-    };
-  }
 
   await saveSchedule(planId, result.slots);
 
@@ -76,8 +86,6 @@ export async function generateScheduleAction(
     .update(studyPlans)
     .set({
       lastScheduleGeneratedAt: new Date().toISOString(),
-      lastScheduleHoursPerWeek: plan.hoursPerWeek,
-      lastScheduleStudyDays: plan.studyDays,
       lastScheduleStartDate: plan.startDate,
       lastScheduleDeadline: plan.deadline,
     })
@@ -85,17 +93,7 @@ export async function generateScheduleAction(
 
   revalidatePath(`/plans/${planId}`);
 
-  const studySlotCount = result.slots.filter((s) => s.type === "study").length;
-  const uniqueDates = new Set(result.slots.map((s) => s.date));
-
-  return {
-    success: true,
-    totalDays: uniqueDates.size,
-    avgTopicsPerDay:
-      studySlotCount > 0 && uniqueDates.size > 0
-        ? Math.round(studySlotCount / uniqueDates.size)
-        : 0,
-  };
+  return { success: true };
 }
 
 export async function moveSlotAction(
@@ -156,14 +154,7 @@ export async function regenerateScheduleAction(
   try {
     await adaptSchedule({ planId, userId: session.user.id });
     revalidatePath(`/plans/${planId}`);
-
-    // Count how many topics remain after rescheduling
-    const remainingTopics = plan.totalTopics - (plan.completedTopics ?? 0);
-    return {
-      success: true,
-      totalDays: remainingTopics > 0 ? remainingTopics : 0,
-      avgTopicsPerDay: remainingTopics > 0 ? 1 : 0,
-    };
+    return { success: true };
   } catch (error) {
     return {
       success: false,
@@ -199,6 +190,32 @@ export async function markTopicStudiedAction(
     return {
       success: false,
       message: error instanceof Error ? error.message : "Failed to mark topic as studied",
+    };
+  }
+}
+
+export async function unmarkTopicStudiedAction(
+  planId: string,
+  topicId: string
+): Promise<MarkStudiedResult> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user?.id) {
+    return { success: false, message: "Not authenticated" };
+  }
+
+  const plan = await getPlanById(planId, session.user.id);
+  if (!plan) {
+    return { success: false, message: "Plan not found" };
+  }
+
+  try {
+    await unmarkTopicStudied(planId, topicId, session.user.id);
+    revalidatePath(`/plans/${planId}`);
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to unmark topic as studied",
     };
   }
 }
@@ -276,6 +293,42 @@ export async function reviewSlotAction(
     return {
       success: false,
       message: error instanceof Error ? error.message : "Failed to process review rating",
+    };
+  }
+}
+
+export async function updateWeekdaysAction(
+  planId: string,
+  weekdays: number[]
+): Promise<GenerateResult> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user?.id) {
+    return { success: false, message: "Not authenticated" };
+  }
+
+  const plan = await getPlanById(planId, session.user.id);
+  if (!plan) {
+    return { success: false, message: "Plan not found" };
+  }
+
+  try {
+    await updatePlan(planId, session.user.id, {
+      weekdays: weekdays.join(","),
+    });
+
+    await adaptSchedule({
+      planId,
+      userId: session.user.id,
+      startDateOverride: plan.startDate,
+      weekdaysOverride: weekdays.join(","),
+    });
+
+    revalidatePath(`/plans/${planId}`);
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to update weekdays",
     };
   }
 }

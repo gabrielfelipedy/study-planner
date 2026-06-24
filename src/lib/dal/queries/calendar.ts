@@ -15,8 +15,7 @@ export type ScheduleSlot = {
   planId: string;
   topicId: string | null;
   date: string;
-  type: "study" | "buffer" | "catch-up" | "revision-7d" | "revision-30d";
-  estimatedMinutes: number | null;
+  type: "study" | "revision-7d" | "revision-30d";
   isCompleted: boolean;
   topicTitle: string | null;
   subjectName: string | null;
@@ -40,7 +39,6 @@ export const getScheduleSlots = cache(
         topicId: scheduleSlots.topicId,
         date: scheduleSlots.date,
         type: scheduleSlots.type,
-        estimatedMinutes: scheduleSlots.estimatedMinutes,
         isCompleted: scheduleSlots.isCompleted,
         topicTitle: topics.title,
         subjectName: subjects.name,
@@ -65,7 +63,6 @@ export const getScheduleSlots = cache(
       topicId: r.topicId,
       date: r.date,
       type: r.type as ScheduleSlot["type"],
-      estimatedMinutes: r.estimatedMinutes ?? 0,
       isCompleted: r.isCompleted ?? false,
       topicTitle: r.topicTitle ?? null,
       subjectName: r.subjectName ?? null,

@@ -12,7 +12,6 @@ export type CreateSubjectInput = {
 export type CreateTopicInput = {
   subjectId: string;
   title: string;
-  estimatedHours?: number;
 };
 
 export async function createSubject(input: CreateSubjectInput): Promise<{ id: string }> {
@@ -90,7 +89,6 @@ export async function createTopic(input: CreateTopicInput): Promise<{ id: string
     id,
     subjectId: input.subjectId,
     title: input.title,
-    estimatedHours: input.estimatedHours ?? null,
     sortOrder: (maxOrder?.max ?? 0) + 1,
   });
   return { id };
@@ -123,7 +121,7 @@ export async function createTopics(
 export async function updateTopic(
   topicId: string,
   userId: string,
-  data: { title?: string; estimatedHours?: number }
+  data: { title?: string }
 ): Promise<void> {
   const topic = await db
     .select({ subjectId: topics.subjectId })

@@ -119,6 +119,9 @@ export function TopicList({ subjectId, initialTopics, userId }: TopicListProps) 
 
   return (
     <div className="space-y-3">
+      <p className="text-sm text-muted-foreground">
+        {topics.length} topic{topics.length === 1 ? "" : "s"}
+      </p>
       <div className="flex items-center gap-2">
         {selectMode ? (
           <>

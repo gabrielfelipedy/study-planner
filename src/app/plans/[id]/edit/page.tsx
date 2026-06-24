@@ -43,6 +43,7 @@ export default async function EditPlanPage({
               deadline: plan.deadline,
               startDate: plan.startDate,
               selectedSubjectIds: plan.subjectIds,
+              weekdays: plan.weekdays ? plan.weekdays.split(",").map(Number) : [1, 2, 3, 4, 5],
             }}
           />
         </CardContent>

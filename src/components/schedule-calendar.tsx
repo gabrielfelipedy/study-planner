@@ -17,15 +17,14 @@ import { TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TopicCard } from "@/components/topic-card";
 import { ScheduleDayCell } from "@/components/schedule-day-cell";
-import { FullDayWarning } from "@/components/full-day-warning";
+import { CompletionToast } from "@/components/completion-toast";
 import type { DayCellSlot } from "@/components/schedule-day-cell";
 
 type Slot = {
   id: string;
   topicId: string;
   date: string;
-  type: "study" | "buffer" | "catch-up" | "revision-7d" | "revision-30d";
-  estimatedMinutes: number;
+  type: "study" | "revision-7d" | "revision-30d";
   isCompleted: boolean;
   topicTitle?: string;
   subjectName?: string;
@@ -38,6 +37,8 @@ type ScheduleCalendarProps = {
   deadline: string;
   planId: string;
   isStale?: boolean;
+  planStartDate?: string;
+  planDeadline?: string;
 };
 
 export function ScheduleCalendar({
@@ -46,18 +47,25 @@ export function ScheduleCalendar({
   deadline,
   planId,
   isStale = false,
+  planStartDate,
+  planDeadline,
 }: ScheduleCalendarProps) {
   const router = useRouter();
   const todayRef = useRef<HTMLDivElement>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [moveError, setMoveError] = useState<string | null>(null);
-  const [isFullDayWarningOpen, setIsFullDayWarningOpen] = useState(false);
-  const [pendingDropTarget, setPendingDropTarget] = useState<{
-    slotId: string;
-    targetDate: string;
-    dayTotalMinutes: number;
-  } | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastKey, setToastKey] = useState(0);
+
+  function handleTopicMarked() {
+    router.refresh();
+  }
+
+  function handleShowToast(message: string) {
+    setToastMessage(message);
+    setToastKey((k) => k + 1);
+  }
 
   const today = format(new Date(), "yyyy-MM-dd");
 
@@ -90,7 +98,6 @@ export function ScheduleCalendar({
         id: s.id,
         topicId: s.topicId,
         title: s.topicTitle,
-        estimatedMinutes: s.estimatedMinutes,
         isCompleted: s.isCompleted,
         subjectColor: s.subjectColor,
         subjectName: s.subjectName,
@@ -156,41 +163,8 @@ export function ScheduleCalendar({
       return;
     }
 
-    // Check capacity — show FullDayWarning if full (D-10)
-    const daySlots = slots.filter(
-      (s) => s.date === targetDate && s.type === "study"
-    );
-    const dayTotalMinutes = daySlots.reduce(
-      (sum, s) => sum + s.estimatedMinutes,
-      0
-    );
-    const MAX_MINUTES = 240;
-
-    if (dayTotalMinutes + activeSlot.estimatedMinutes > MAX_MINUTES) {
-      setPendingDropTarget({
-        slotId: activeSlot.id,
-        targetDate,
-        dayTotalMinutes,
-      });
-      setIsFullDayWarningOpen(true);
-      setActiveId(null);
-      return;
-    }
-
     // Proceed with the move
     executeMove(activeSlot.id, targetDate);
-  }
-
-  function handleOverbook() {
-    if (!pendingDropTarget) return;
-    setIsFullDayWarningOpen(false);
-    executeMove(pendingDropTarget.slotId, pendingDropTarget.targetDate);
-    setPendingDropTarget(null);
-  }
-
-  function handleChooseAnotherDay() {
-    setIsFullDayWarningOpen(false);
-    setPendingDropTarget(null);
   }
 
   const activeSlot = activeId
@@ -199,15 +173,6 @@ export function ScheduleCalendar({
 
   return (
     <div className="space-y-6">
-      <FullDayWarning
-        open={isFullDayWarningOpen}
-        onOpenChange={(v) => {
-          if (!v) handleChooseAnotherDay();
-        }}
-        dayTotalMinutes={pendingDropTarget?.dayTotalMinutes ?? 0}
-        onOverbook={handleOverbook}
-        onChooseAnotherDay={handleChooseAnotherDay}
-      />
 
       {isStale && (
         <div
@@ -269,7 +234,9 @@ export function ScheduleCalendar({
                     {week.days.map((day) => {
                       const isToday = day.dateStr === today;
                       const isPast = day.dateStr < today;
-                      const isStudyDay = day.dateStr >= startDate && day.dateStr <= deadline;
+                      const effectivePlanStart = planStartDate ?? startDate;
+                      const effectivePlanDeadline = planDeadline ?? deadline;
+                      const isStudyDay = day.dateStr >= effectivePlanStart && day.dateStr <= effectivePlanDeadline;
 
                       return (
                         <ScheduleDayCell
@@ -282,6 +249,9 @@ export function ScheduleCalendar({
                           isToday={isToday}
                           isPast={isPast}
                           isStudyDay={isStudyDay}
+                          planId={planId}
+                          onTopicMarked={handleTopicMarked}
+                          onShowToast={handleShowToast}
                         />
                       );
                     })}
@@ -298,7 +268,6 @@ export function ScheduleCalendar({
                   id: activeSlot.id,
                   topicId: activeSlot.topicId,
                   title: activeSlot.topicTitle,
-                  estimatedMinutes: activeSlot.estimatedMinutes,
                   isCompleted: activeSlot.isCompleted,
                   subjectColor: activeSlot.subjectColor,
                   subjectName: activeSlot.subjectName,
@@ -309,6 +278,11 @@ export function ScheduleCalendar({
           </DragOverlay>
         </DndContext>
       </div>
+
+      <CompletionToast
+        message={toastMessage ?? ""}
+        toastKey={toastKey > 0 ? String(toastKey) : null}
+      />
     </div>
   );
 }

@@ -43,6 +43,20 @@
       "when": 1782257950000,
       "tag": "0005_add_is_manual",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1782350000000,
+      "tag": "0006_remove_time_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1782400000000,
+      "tag": "0007_add_weekdays",
+      "breakpoints": true
     }
   ]
 }

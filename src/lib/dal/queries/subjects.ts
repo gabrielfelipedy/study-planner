@@ -12,7 +12,6 @@ export type SubjectWithTopics = {
   topics: Array<{
     id: string;
     title: string;
-    estimatedHours: number | null;
     status: string;
     sortOrder: number;
   }>;
@@ -67,7 +66,6 @@ export const getSubjectById = cache(async (subjectId: string, userId: string): P
     topics: topicRows.map((t) => ({
       id: t.id,
       title: t.title,
-      estimatedHours: t.estimatedHours,
       status: t.status ?? "pending",
       sortOrder: t.sortOrder ?? 0,
     })),

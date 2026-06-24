@@ -11,11 +11,10 @@ export type TopicCardSlot = {
   id: string;
   topicId: string;
   title?: string;
-  estimatedMinutes: number;
   isCompleted: boolean;
   subjectColor?: string;
   subjectName?: string;
-  type?: "study" | "buffer" | "catch-up" | "revision-7d" | "revision-30d";
+  type?: "study" | "revision-7d" | "revision-30d";
   isBehind?: boolean;
 };
 
@@ -56,7 +55,8 @@ export function TopicCard({
   useEffect(() => { setMounted(true); }, []);
 
   function handleCardClick() {
-    if (isDragging || isDragOverlay || slot.isCompleted || isMarking || !planId) return;
+    if (isDragging || isDragOverlay || isMarking || !planId) return;
+    if (slot.isCompleted && isRevision) return;
     setShowMarkButton((prev) => !prev);
   }
 
@@ -76,6 +76,22 @@ export function TopicCard({
     }
   }, [planId, slot.topicId, onMarked, onShowToast]);
 
+  const handleUnmarkComplete = useCallback(async () => {
+    if (!planId) return;
+    setIsMarking(true);
+    try {
+      const { unmarkTopicStudiedAction } = await import("@/app/plans/[id]/actions");
+      const result = await unmarkTopicStudiedAction(planId, slot.topicId);
+      if (result.success) {
+        onMarked?.();
+        onShowToast?.("Topic marked as pending");
+        setShowMarkButton(false);
+      }
+    } finally {
+      setIsMarking(false);
+    }
+  }, [planId, slot.topicId, onMarked, onShowToast]);
+
   if (isDragOverlay) {
     return (
       <div className="mb-1 rounded-md border bg-card p-1.5 shadow-lg opacity-90 rotate-1 scale-105 ring-1 ring-border pointer-events-none">
@@ -83,8 +99,7 @@ export function TopicCard({
           {slot.subjectColor && (
             <div className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: slot.subjectColor }} />
           )}
-          <span className="truncate text-xs font-medium text-foreground">{slot.title ?? "Study"}</span>
-          <span className="ml-auto text-xs text-muted-foreground">{slot.estimatedMinutes}m</span>
+          <span className="text-xs font-medium text-foreground">{slot.title ?? "Study"}</span>
         </div>
       </div>
     );
@@ -99,20 +114,23 @@ export function TopicCard({
       onClick={handleCardClick}
       className={`mb-1 rounded-md border bg-card p-1.5 text-xs transition-colors hover:bg-muted/50 ${isRevision ? "cursor-pointer border-indigo-300 bg-indigo-50 dark:border-indigo-800 dark:bg-indigo-950/40" : "cursor-grab active:cursor-grabbing"} ${isDragging ? "opacity-30" : ""} ${slot.isCompleted ? "opacity-60" : ""} ${slot.isBehind ? "border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/40" : ""}`}
       aria-roledescription="draggable topic"
-      aria-label={`Topic: ${slot.title ?? "Study"}, Duration: ${slot.estimatedMinutes} minutes`}
+      aria-label={`Topic: ${slot.title ?? "Study"}`}
     >
-      <div className="flex items-center gap-1.5">
-        {slot.subjectColor && (
-          <div className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: slot.subjectColor }} />
-        )}
-        <span className="truncate flex-1 text-xs font-medium text-foreground">{slot.title ?? "Study"}</span>
-        <Badge
-          variant="secondary"
-          className={`text-[10px] px-1.5 py-0 ${slot.isCompleted ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : ""} ${isRevision && !slot.isCompleted ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400" : ""}`}
-        >
-          {slot.isCompleted ? "✓" : isRevision ? "Review" : "Pending"}
-        </Badge>
-        <span className="text-xs text-muted-foreground">{slot.estimatedMinutes}m</span>
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-1.5">
+          {slot.subjectColor && (
+            <div className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: slot.subjectColor }} />
+          )}
+          <span className="line-clamp-2 flex-1 text-xs font-medium text-foreground" title={slot.title ?? "Study"}>{slot.title ?? "Study"}</span>
+        </div>
+        <div className="flex justify-end mt-0.5">
+          <Badge
+            variant="secondary"
+            className={`text-[10px] px-1.5 py-0 ${slot.isCompleted ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : ""} ${isRevision && !slot.isCompleted ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400" : ""}`}
+          >
+            {slot.isCompleted ? "✓" : isRevision ? "Review" : "Pending"}
+          </Badge>
+        </div>
       </div>
       {showMarkButton && (
         <div className="mt-1.5 border-t border-border pt-1.5">
@@ -128,6 +146,18 @@ export function TopicCard({
               }}
               onError={(msg) => onShowToast?.(msg)}
             />
+          ) : slot.isCompleted ? (
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 w-full text-xs"
+                onClick={(e) => { e.stopPropagation(); handleUnmarkComplete(); }}
+                disabled={isMarking}
+              >
+                {isMarking ? "Unmarking..." : "Unmark"}
+              </Button>
+            </div>
           ) : (
             <div className="flex items-center gap-2">
               <Button

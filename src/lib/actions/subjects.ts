@@ -49,7 +49,7 @@ export async function reorderTopics(
 export async function updateTopic(
   topicId: string,
   userId: string,
-  data: { title?: string; estimatedHours?: number }
+  data: { title?: string }
 ) {
   return dalUpdateTopic(topicId, userId, data);
 }

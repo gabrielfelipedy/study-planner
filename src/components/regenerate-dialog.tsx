@@ -15,16 +15,14 @@ import {
 type RegenerateDialogProps = {
   planId: string;
   onRegenerate: () => Promise<void>;
-  onKeep: () => void;
   onCancel: () => void;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
 export function RegenerateDialog({
-  planId,
+  planId: _planId,
   onRegenerate,
-  onKeep,
   onCancel,
   open,
   onOpenChange,
@@ -47,36 +45,25 @@ export function RegenerateDialog({
     }
   }
 
-  function handleKeep() {
-    onKeep();
-    onOpenChange(false);
-    router.refresh();
-  }
-
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onCancel(); onOpenChange(v); }}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Regenerate schedule?</DialogTitle>
           <DialogDescription>
-            Manual adjustments to future dates will be preserved.
+            This will reschedule all uncompleted past topics to future days.
           </DialogDescription>
         </DialogHeader>
         {error && (
           <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
         )}
-        <DialogFooter className="flex gap-2 sm:justify-between">
-          <Button variant="outline" onClick={handleKeep} disabled={saving}>
-            Keep current
+        <DialogFooter className="flex gap-2">
+          <Button variant="outline" onClick={() => { onOpenChange(false); onCancel(); }} disabled={saving}>
+            Cancel
           </Button>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => { onOpenChange(false); onCancel(); }} disabled={saving}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleRegenerate} disabled={saving}>
-              {saving ? "Generating…" : "Regenerate"}
-            </Button>
-          </div>
+          <Button variant="destructive" onClick={handleRegenerate} disabled={saving}>
+            {saving ? "Generating…" : "Regenerate"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

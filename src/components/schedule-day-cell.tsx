@@ -7,7 +7,7 @@ import { TopicCard } from "@/components/topic-card";
 import type { TopicCardSlot } from "@/components/topic-card";
 
 export type DayCellSlot = TopicCardSlot & {
-  type: "study" | "buffer" | "catch-up" | "revision-7d" | "revision-30d";
+  type: "study" | "revision-7d" | "revision-30d";
 };
 
 type ScheduleDayCellProps = {
@@ -35,13 +35,10 @@ export function ScheduleDayCell({
 }: ScheduleDayCellProps) {
   const { setNodeRef, isOver } = useDroppable({ id: `day-${dateStr}` });
 
-  const bufferSlots = slots.filter((s) => s.type === "buffer" || s.type === "catch-up");
   const studySlots = slots.filter((s) => s.type === "study");
   const revisionSlots = slots.filter(
     (s) => s.type === "revision-7d" || s.type === "revision-30d"
   );
-  const hasCatchUp = bufferSlots.some((s) => s.type === "catch-up");
-  const hasBuffer = bufferSlots.some((s) => s.type === "buffer");
   const hasBehind = isPast && studySlots.some((s) => !s.isCompleted);
 
   let cellClasses = "min-h-[120px] border-r border-b border-border p-2 transition-colors";
@@ -49,14 +46,6 @@ export function ScheduleDayCell({
   else if (isOver) cellClasses += " bg-accent/50 ring-1 ring-ring";
   else if (isPast) cellClasses += " opacity-60";
   else if (!isStudyDay) cellClasses += " bg-muted/20";
-
-  let catchUpStyle = "";
-  if (hasCatchUp) {
-    cellClasses += " bg-amber-950/30";
-    catchUpStyle = " border-t-2 border-t-amber-600 border-dashed";
-  } else if (hasBuffer) {
-    cellClasses += " bg-muted/20";
-  }
 
   if (hasBehind) {
     cellClasses += " bg-amber-950/20";
@@ -79,7 +68,7 @@ export function ScheduleDayCell({
   }));
 
   return (
-    <div ref={setNodeRef} className={cellClasses + catchUpStyle}>
+    <div ref={setNodeRef} className={cellClasses}>
       <div className="mb-1 text-center text-xs text-muted-foreground">
         {format(date, "d")}
       </div>
@@ -104,13 +93,6 @@ export function ScheduleDayCell({
           onShowToast={onShowToast}
         />
       ))}
-
-      {hasCatchUp && (
-        <div className="mt-1 text-center text-xs font-medium text-amber-500">Catch-up</div>
-      )}
-      {hasBuffer && !hasCatchUp && (
-        <div className="mt-1 text-center text-xs italic text-muted-foreground">Buffer</div>
-      )}
     </div>
   );
 }

@@ -23,8 +23,7 @@ export async function updatePlan(
     title?: string;
     deadline?: string;
     startDate?: string;
-    hoursPerWeek?: number | null;
-    studyDays?: string | null;
+    weekdays?: string;
   }
 ): Promise<PlanResult | null> {
   return dalUpdatePlan(planId, userId, data);

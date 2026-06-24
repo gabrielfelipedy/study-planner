@@ -7,13 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
 import { differenceInDays } from "date-fns";
-import { getPlanById } from "@/lib/dal/queries/plans";
-import { regenerateScheduleAction } from "./actions";
+import { getPlanById, getPlanTopicSyncStatuses } from "@/lib/dal/queries/plans";
+import { syncSubjectTopicsAction } from "./actions";
 import { getScheduleSlots } from "@/lib/dal/queries/calendar";
-import { StudyTimeForm } from "@/components/study-time-form";
 import { ArchiveDialog } from "@/components/archive-dialog";
 import { ScheduleGenerator } from "@/components/schedule-generator";
 import { ScheduleWithDialogs } from "@/components/schedule-with-dialogs";
+import { WeekdayToggle } from "@/components/weekday-toggle";
+import { RegenerateButton } from "@/components/regenerate-button";
 
 export default async function PlanDetailPage({
   params,
@@ -30,13 +31,12 @@ export default async function PlanDetailPage({
   const slots = await getScheduleSlots(id, plan.startDate, plan.deadline);
   const hasSchedule = slots.length > 0;
   const hasTopics = plan.totalTopics > 0;
-  const hasStudyInputs = plan.hoursPerWeek && plan.studyDays;
+  const syncStatuses = await getPlanTopicSyncStatuses(id);
+  const outOfSyncSubjects = syncStatuses.filter((s) => s.isOutOfSync);
 
   const hasStaleInputs =
     hasSchedule &&
-    (plan.lastScheduleHoursPerWeek !== plan.hoursPerWeek ||
-      plan.lastScheduleStudyDays !== plan.studyDays ||
-      plan.lastScheduleStartDate !== plan.startDate ||
+    (plan.lastScheduleStartDate !== plan.startDate ||
       plan.lastScheduleDeadline !== plan.deadline);
 
   const deadlineDate = new Date(plan.deadline);
@@ -68,14 +68,7 @@ export default async function PlanDetailPage({
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
-            <form
-              action={async () => { await regenerateScheduleAction(id); }}
-              className="inline"
-            >
-              <Button type="submit" variant="outline" size="sm">
-                Regenerate from today
-              </Button>
-            </form>
+            <RegenerateButton planId={id} />
             <Link href={`/plans/${id}/edit`}>
               <Button variant="outline" size="sm">Edit</Button>
             </Link>
@@ -120,6 +113,13 @@ export default async function PlanDetailPage({
         </div>
       </div>
 
+      <div className="mb-6">
+        <WeekdayToggle
+          planId={id}
+          weekdays={plan.weekdays ? plan.weekdays.split(",").map(Number) : [1, 2, 3, 4, 5]}
+        />
+      </div>
+
       <section className="mb-8">
         <h2 className="mb-3 text-lg font-medium text-foreground">Subjects</h2>
         {plan.subjects.length > 0 ? (
@@ -149,38 +149,47 @@ export default async function PlanDetailPage({
         )}
       </section>
 
-      <div id="study-time-form">
-        <StudyTimeForm
-          planId={id}
-          userId={session.user.id}
-          initialHoursPerWeek={plan.hoursPerWeek}
-          initialStudyDays={plan.studyDays}
-        />
-      </div>
+      {outOfSyncSubjects.length > 0 && (
+        <section className="mb-8 space-y-2">
+          {outOfSyncSubjects.map((subject) => (
+            <div
+              key={subject.id}
+              className="flex items-center gap-3 rounded-md border border-amber-500/30 bg-amber-950/10 px-4 py-3"
+            >
+              <span className="text-sm text-amber-400">
+                Topics on this plan ({subject.planTopicCount}) differ from subject{" "}
+                <strong>{subject.name}</strong> ({subject.subjectTopicCount} topics).
+              </span>
+              <form
+                action={syncSubjectTopicsAction.bind(null, id, subject.id) as unknown as (
+                  formData: FormData
+                ) => Promise<void>}
+                className="ml-auto shrink-0"
+              >
+                <button
+                  type="submit"
+                  className="rounded-md bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-500"
+                >
+                  Update topics
+                </button>
+              </form>
+            </div>
+          ))}
+        </section>
+      )}
 
       <section className="mt-8">
-        {!hasStudyInputs || !hasTopics ? (
+        {!hasTopics ? (
           <div className="rounded-lg border-2 border-dashed border-border p-12 text-center">
             <h3 className="text-lg font-medium text-foreground">No schedule yet</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              {!hasTopics
-                ? "No topics in this plan. Add topics to your subjects before generating a schedule."
-                : "Set your study availability and add topics to generate a schedule."}
+              No topics in this plan. Add topics to your subjects before generating a schedule.
             </p>
-            {!hasStudyInputs && (
-              <a href="#study-time-form">
-                <Button variant="default" className="mt-4">
-                  Set study time
-                </Button>
-              </a>
-            )}
-            {!hasTopics && (
-              <Link href="/subjects">
-                <Button variant="default" className="mt-4">
-                  Manage subjects
-                </Button>
-              </Link>
-            )}
+            <Link href="/subjects">
+              <Button variant="default" className="mt-4">
+                Manage subjects
+              </Button>
+            </Link>
           </div>
         ) : !hasSchedule ? (
           <ScheduleGenerator planId={id} />
@@ -191,8 +200,7 @@ export default async function PlanDetailPage({
               id: s.id,
               topicId: s.topicId ?? "",
               date: s.date,
-              type: s.type as "study" | "buffer" | "catch-up" | "revision-7d" | "revision-30d",
-              estimatedMinutes: s.estimatedMinutes ?? 0,
+              type: s.type as "study" | "revision-7d" | "revision-30d",
               isCompleted: s.isCompleted,
               topicTitle: s.topicTitle ?? undefined,
               subjectName: s.subjectName ?? undefined,

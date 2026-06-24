@@ -44,9 +44,6 @@ export default async function SubjectDetailPage({
             />
           </div>
         </div>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {subject.topics.length} topic{subject.topics.length === 1 ? "" : "s"}
-        </p>
       </div>
 
       <TopicList

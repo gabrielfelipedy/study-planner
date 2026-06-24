@@ -6,16 +6,16 @@ import {
 } from "recharts";
 import type { WeeklyStudyHours } from "@/types/dashboard";
 
-type WeeklyStudyHoursChartProps = {
+type WeeklyTopicChartProps = {
   data: WeeklyStudyHours[];
 };
 
-export function WeeklyStudyHoursChart({ data }: WeeklyStudyHoursChartProps) {
+export function WeeklyTopicChart({ data }: WeeklyTopicChartProps) {
   if (data.length === 0) {
     return (
       <div className="flex items-center justify-center rounded-lg border bg-card p-12 text-center">
         <p className="text-sm text-muted-foreground">
-          Select a plan to see weekly study hours
+          Select a plan to see weekly topic completion
         </p>
       </div>
     );
@@ -31,12 +31,12 @@ export function WeeklyStudyHoursChart({ data }: WeeklyStudyHoursChartProps) {
 
   return (
     <div>
-      <h3 className="mb-4 text-sm font-medium text-foreground">Weekly Study Hours</h3>
+      <h3 className="mb-4 text-sm font-medium text-foreground">Weekly Topic Completion</h3>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
           <XAxis dataKey="weekLabel" tick={{ fontSize: 12 }} className="text-muted-foreground" />
-          <YAxis tick={{ fontSize: 12 }} className="text-muted-foreground" label={{ value: "Hours", angle: -90, position: "insideLeft", style: { fontSize: 12 } }} />
+          <YAxis tick={{ fontSize: 12 }} className="text-muted-foreground" label={{ value: "Topics", angle: -90, position: "insideLeft", style: { fontSize: 12 } }} />
           <Tooltip />
           <Legend />
           <Bar
@@ -49,7 +49,7 @@ export function WeeklyStudyHoursChart({ data }: WeeklyStudyHoursChartProps) {
           <Bar
             dataKey="actualHours"
             fill="hsl(var(--primary))"
-            name="Actual"
+            name="Completed"
             radius={[4, 4, 0, 0]}
           />
         </BarChart>
