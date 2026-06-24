@@ -10,6 +10,7 @@ import { generateScheduleAction } from "@/app/plans/[id]/actions";
 import { useState, useMemo } from "react";
 import { WeekdayPicker } from "@/components/weekday-picker";
 import { SchedulePreview } from "@/components/schedule-preview";
+import { CompletionToast } from "@/components/completion-toast";
 
 type SubjectOption = {
   id: string;
@@ -35,6 +36,7 @@ type PlanFormProps = {
 export function PlanForm({ mode, userId, subjects, initialData }: PlanFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [toastKey, setToastKey] = useState(0);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(
     new Set(initialData?.selectedSubjectIds ?? [])
   );
@@ -87,7 +89,8 @@ export function PlanForm({ mode, userId, subjects, initialData }: PlanFormProps)
           weekdays: weekdays.join(","),
           subjectIds: Array.from(selectedIds),
         });
-        router.push(`/plans/${result.id}`);
+        setToastKey((k) => k + 1);
+        setTimeout(() => router.push(`/plans/${result.id}`), 1000);
       } else if (initialData) {
         await updatePlan(initialData.id, userId, {
           title: title.trim(),
@@ -112,7 +115,8 @@ export function PlanForm({ mode, userId, subjects, initialData }: PlanFormProps)
         }
 
         await generateScheduleAction(initialData.id);
-        router.push(`/plans/${initialData.id}`);
+        setToastKey((k) => k + 1);
+        setTimeout(() => router.push(`/plans/${initialData.id}`), 1000);
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save plan");
@@ -223,6 +227,11 @@ export function PlanForm({ mode, userId, subjects, initialData }: PlanFormProps)
       <Button type="submit" className="w-full" disabled={subjects.length === 0}>
         {mode === "create" ? "Create plan" : "Save changes"}
       </Button>
+
+      <CompletionToast
+        message={mode === "create" ? "Plan created! ✓" : "Changes saved! ✓"}
+        toastKey={toastKey > 0 ? String(toastKey) : null}
+      />
     </form>
   );
 }

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { createSubject, updateSubject } from "@/lib/actions/subjects";
 import { useState } from "react";
+import { CompletionToast } from "@/components/completion-toast";
 
 const SUBJECT_COLORS = [
   { value: "#ef4444", label: "Red" },
@@ -38,6 +39,7 @@ type SubjectFormProps = {
 export function SubjectForm({ mode, initialData, userId }: SubjectFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [toastKey, setToastKey] = useState(0);
 
   async function handleSubmit(formData: FormData) {
     setError(null);
@@ -49,17 +51,18 @@ export function SubjectForm({ mode, initialData, userId }: SubjectFormProps) {
       return;
     }
 
-    if (mode === "create") {
-      try {
+    try {
+      if (mode === "create") {
         await createSubject({ userId, name: name.trim(), color });
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Failed to create subject");
-        return;
+        setToastKey((k) => k + 1);
+        setTimeout(() => router.push("/subjects"), 1000);
+      } else if (initialData) {
+        await updateSubject(initialData.id, userId, { name: name.trim(), color });
+        setToastKey((k) => k + 1);
+        setTimeout(() => router.push("/subjects"), 1000);
       }
-      router.push("/subjects");
-    } else if (initialData) {
-      await updateSubject(initialData.id, userId, { name: name.trim(), color });
-      router.push("/subjects");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to save subject");
     }
   }
 
@@ -108,6 +111,11 @@ export function SubjectForm({ mode, initialData, userId }: SubjectFormProps) {
       <Button type="submit" className="w-full">
         {mode === "create" ? "Create subject" : "Save changes"}
       </Button>
+
+      <CompletionToast
+        message={mode === "create" ? "Subject created! ✓" : "Changes saved! ✓"}
+        toastKey={toastKey > 0 ? String(toastKey) : null}
+      />
     </form>
   );
 }
