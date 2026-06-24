@@ -133,8 +133,8 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 07-01-PLAN.md — Adapt engine & schema: isManual migration, adaptSchedule(), moveSlotAction setManual, regenerateScheduleAction rewrite
-- [ ] 07-02-PLAN.md — Backlog display & behind-schedule UI: regenerate button, backlog indicator, amber calendar styling, dialog update
+- [x] 07-01-PLAN.md — Adapt engine & schema: isManual migration, adaptSchedule(), moveSlotAction setManual, regenerateScheduleAction rewrite
+- [x] 07-02-PLAN.md — Backlog display & behind-schedule UI: regenerate button, backlog indicator, amber calendar styling, dialog update
 
 ### Phase 8: Dashboard & Visualizations
 **Goal**: Users can see progress trends and study metrics through visual charts
@@ -162,7 +162,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 4. Timetable Engine & Schedule View | 4/4 | ✓ Complete | 2026-06-23 |
 | 5. Study Sessions & Progress Tracking | 3/3 | ✓ Complete | 2026-06-23 |
 | 6. Revision Scheduling | 2/2 | ✓ Complete | 2026-06-23 |
-| 7. Adaptive Rescheduling | 0/2 | Not started | - |
+| 7. Adaptive Rescheduling | 2/2 | ✓ Complete | 2026-06-23 |
 | 8. Dashboard & Visualizations | 0/0 | Not started | - |
 
 ---
