@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { type TodayTopic, getTodaySchedule } from "@/lib/dal/queries/progress";
+import { getTodaySchedule } from "@/lib/dal/queries/progress";
 import { getPlansForUser } from "@/lib/dal/queries/plans";
 import {
   getDashboardStats,
@@ -28,7 +28,7 @@ export default async function Home({
   const selectedPlanId = params.plan ?? null;
 
   // Today's schedule for the progress section
-  const todaySchedule: TodayTopic[] = session?.user?.id
+  const todaySchedule: Awaited<ReturnType<typeof getTodaySchedule>> = session?.user?.id
     ? await getTodaySchedule(session.user.id)
     : [];
   const todayCompleted = todaySchedule.filter((t) => t.isCompleted).length;
