@@ -2,20 +2,20 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { getTodaySchedule } from "@/lib/dal/queries/progress";
+import { type TodayTopic, getTodaySchedule } from "@/lib/dal/queries/progress";
 import { getPlansForUser } from "@/lib/dal/queries/plans";
 import {
   getDashboardStats,
   getCompletionOverTime,
   getSubjectDistribution,
-  getWeeklyStudyHours,
+  getWeeklyTopicCompletion,
   getRevisionAdherence,
 } from "@/lib/dal/queries/dashboard";
 import { KpiCards } from "@/components/dashboard/kpi-cards";
 import { PlanSelector } from "@/components/dashboard/plan-selector";
 import { CompletionOverTimeChart } from "@/components/dashboard/completion-over-time-chart";
 import { SubjectDistributionChart } from "@/components/dashboard/subject-distribution-chart";
-import { WeeklyStudyHoursChart } from "@/components/dashboard/study-hours-chart";
+import { WeeklyTopicChart } from "@/components/dashboard/study-hours-chart";
 import { RevisionAdherenceChart } from "@/components/dashboard/revision-adherence-chart";
 
 export default async function Home({
@@ -28,7 +28,7 @@ export default async function Home({
   const selectedPlanId = params.plan ?? null;
 
   // Today's schedule for the progress section
-  const todaySchedule = session?.user?.id
+  const todaySchedule: TodayTopic[] = session?.user?.id
     ? await getTodaySchedule(session.user.id)
     : [];
   const todayCompleted = todaySchedule.filter((t) => t.isCompleted).length;
@@ -41,7 +41,7 @@ export default async function Home({
   let stats: Awaited<ReturnType<typeof getDashboardStats>> | null = null;
   let completionData: Awaited<ReturnType<typeof getCompletionOverTime>> = [];
   let subjectData: Awaited<ReturnType<typeof getSubjectDistribution>> = [];
-  let studyHoursData: Awaited<ReturnType<typeof getWeeklyStudyHours>> = [];
+  let studyHoursData: Awaited<ReturnType<typeof getWeeklyTopicCompletion>> = [];
   let revisionData: Awaited<ReturnType<typeof getRevisionAdherence>> = [];
 
   if (session?.user?.id) {
@@ -58,9 +58,9 @@ export default async function Home({
           getRevisionAdherence(session.user.id, planId),
         ]);
 
-      // Study hours chart only works per-plan (D-06)
+      // Weekly topic completion chart only works per-plan
       if (selectedPlanId) {
-        studyHoursData = await getWeeklyStudyHours(
+        studyHoursData = await getWeeklyTopicCompletion(
           session.user.id,
           selectedPlanId
         );
@@ -191,7 +191,7 @@ export default async function Home({
                   </div>
                   {selectedPlanId && (
                     <div className="rounded-lg border bg-card p-5 shadow-sm">
-                      <WeeklyStudyHoursChart data={studyHoursData} />
+                      <WeeklyTopicChart data={studyHoursData} />
                     </div>
                   )}
                   <div className="rounded-lg border bg-card p-5 shadow-sm">
