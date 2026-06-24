@@ -146,8 +146,13 @@ Plans:
   3. User can see weekly study hours vs planned hours chart
   4. User can see revision adherence rate (scheduled vs completed revisions)
   5. All metrics use positive/completion-based framing (no "overdue" or "missed" shame indicators)
-**Plans**: TBD
+**Plans**: 3 plans (3 waves)
 **UI hint**: yes
+
+Plans:
+- [ ] 08-01-PLAN.md — Data layer & types: install Recharts, 5 DAL queries, type contracts
+- [ ] 08-02-PLAN.md — Chart components: 4 Recharts charts, KPI cards, plan selector
+- [ ] 08-03-PLAN.md — Dashboard homepage: wire data to charts, empty states, responsive layout
 
 ## Progress
 
@@ -163,7 +168,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 5. Study Sessions & Progress Tracking | 3/3 | ✓ Complete | 2026-06-23 |
 | 6. Revision Scheduling | 2/2 | ✓ Complete | 2026-06-23 |
 | 7. Adaptive Rescheduling | 2/2 | ✓ Complete | 2026-06-23 |
-| 8. Dashboard & Visualizations | 0/0 | Not started | - |
+| 8. Dashboard & Visualizations | 0/3 | Planning | - |
 
 ---
 
