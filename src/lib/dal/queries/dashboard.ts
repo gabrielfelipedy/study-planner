@@ -2,7 +2,13 @@ import { cache } from "react";
 import { db } from "@/lib/db/client";
 import { studyPlans, scheduleSlots, completions, subjects, topics, planTopics } from "@/lib/db/schema";
 import { eq, and, sql, inArray } from "drizzle-orm";
-import type { DashboardStats, CompletionDataPoint, SubjectDistribution } from "@/types/dashboard";
+import type {
+  DashboardStats,
+  CompletionDataPoint,
+  SubjectDistribution,
+  WeeklyStudyHours,
+  RevisionAdherence,
+} from "@/types/dashboard";
 
 /**
  * Get KPI summary stats for the dashboard.
@@ -215,4 +221,138 @@ export const getSubjectDistribution = cache(async (
       percentage: total > 0 ? Math.round((r.completed / total) * 100) : 0,
     };
   });
+});
+
+/**
+ * Get weekly planned vs actual study hours for a specific plan (D-06).
+ * Returns array of WeeklyStudyHours sorted by weekStart ascending.
+ * REQUIRES a planId — this chart only makes sense per-plan (per D-06).
+ * Groups study-type schedule slots by ISO week (Monday start).
+ * Planned hours = sum of estimatedMinutes/60 for study-type slots in that week.
+ * Actual hours = sum of estimatedMinutes/60 for study-type + completed slots in that week.
+ */
+export const getWeeklyStudyHours = cache(async (
+  userId: string,
+  planId: string
+): Promise<WeeklyStudyHours[]> => {
+  // Verify plan ownership first
+  const plan = await db
+    .select({ id: studyPlans.id })
+    .from(studyPlans)
+    .where(and(eq(studyPlans.id, planId), eq(studyPlans.userId, userId)))
+    .get();
+
+  if (!plan) return [];
+
+  // Get study-type schedule slots for this plan
+  const rows = await db
+    .select({
+      date: scheduleSlots.date,
+      estimatedMinutes: scheduleSlots.estimatedMinutes,
+      isCompleted: scheduleSlots.isCompleted,
+    })
+    .from(scheduleSlots)
+    .where(
+      and(
+        eq(scheduleSlots.planId, planId),
+        eq(scheduleSlots.type, "study")
+      )
+    )
+    .orderBy(scheduleSlots.date)
+    .all();
+
+  // Group into ISO weeks (Monday start)
+  const weekMap = new Map<string, { planned: number; actual: number }>();
+
+  for (const row of rows) {
+    const date = new Date(row.date + "T00:00:00");
+    const dayOfWeek = date.getDay();
+    const monday = new Date(date);
+    monday.setDate(date.getDate() - ((dayOfWeek + 6) % 7)); // ISO week: Monday start
+    const weekStart = monday.toISOString().split("T")[0];
+
+    const minutes = row.estimatedMinutes ?? 0;
+    const current = weekMap.get(weekStart) ?? { planned: 0, actual: 0 };
+    current.planned += minutes;
+    if (row.isCompleted) {
+      current.actual += minutes;
+    }
+    weekMap.set(weekStart, current);
+  }
+
+  return Array.from(weekMap.entries())
+    .map(([weekStart, vals]) => ({
+      weekStart,
+      plannedHours: Math.round((vals.planned / 60) * 10) / 10,
+      actualHours: Math.round((vals.actual / 60) * 10) / 10,
+    }))
+    .sort((a, b) => a.weekStart.localeCompare(b.weekStart));
+});
+
+/**
+ * Get revision adherence data — scheduled vs completed revisions per week (D-07).
+ * Returns array of RevisionAdherence sorted by weekStart ascending.
+ * When planId is undefined, aggregates revision slots across all user plans.
+ * When planId is provided, filters to that specific plan.
+ */
+export const getRevisionAdherence = cache(async (
+  userId: string,
+  planId?: string
+): Promise<RevisionAdherence[]> => {
+  // Get all accessible plan IDs for this user
+  const userPlans = await db
+    .select({ id: studyPlans.id })
+    .from(studyPlans)
+    .where(eq(studyPlans.userId, userId))
+    .all();
+
+  if (userPlans.length === 0) return [];
+
+  const targetPlanIds = planId
+    ? userPlans.filter(p => p.id === planId).map(p => p.id)
+    : userPlans.map(p => p.id);
+
+  if (targetPlanIds.length === 0) return [];
+
+  // Get all revision-type slots for the target plans
+  const rows = await db
+    .select({
+      date: scheduleSlots.date,
+      isCompleted: scheduleSlots.isCompleted,
+    })
+    .from(scheduleSlots)
+    .where(
+      and(
+        sql`${scheduleSlots.type} LIKE 'revision-%'`,
+        inArray(scheduleSlots.planId, targetPlanIds)
+      )
+    )
+    .orderBy(scheduleSlots.date)
+    .all();
+
+  // Group by ISO week (Monday start)
+  const weekMap = new Map<string, { scheduled: number; completed: number }>();
+
+  for (const row of rows) {
+    const date = new Date(row.date + "T00:00:00");
+    const dayOfWeek = date.getDay();
+    const monday = new Date(date);
+    monday.setDate(date.getDate() - ((dayOfWeek + 6) % 7));
+    const weekStart = monday.toISOString().split("T")[0];
+
+    const current = weekMap.get(weekStart) ?? { scheduled: 0, completed: 0 };
+    current.scheduled += 1;
+    if (row.isCompleted) {
+      current.completed += 1;
+    }
+    weekMap.set(weekStart, current);
+  }
+
+  return Array.from(weekMap.entries())
+    .map(([weekStart, vals]) => ({
+      weekStart,
+      scheduled: vals.scheduled,
+      completed: vals.completed,
+    }))
+    .sort((a, b) => a.weekStart.localeCompare(b.weekStart));
 });
