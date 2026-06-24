@@ -9,7 +9,7 @@ const publicRoutes = [
   "/reset-password",
 ];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isPublicRoute = publicRoutes.some((route) => pathname === route);
