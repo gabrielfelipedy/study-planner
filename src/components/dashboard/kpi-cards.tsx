@@ -15,7 +15,7 @@ export function KpiCards({ stats }: KpiCardsProps) {
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="rounded-lg border bg-card p-5 shadow-sm animate-pulse">
+          <div key={i} className="rounded-lg border-card-border border-[0.5px] bg-card p-5 shadow-sm animate-pulse">
             <div className="h-3 w-20 rounded bg-muted" />
             <div className="mt-2 h-7 w-16 rounded bg-muted" />
           </div>
@@ -45,7 +45,7 @@ export function KpiCards({ stats }: KpiCardsProps) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
       {cards.map((card) => (
-        <div key={card.label} className="rounded-lg border bg-card p-5 shadow-sm">
+        <div key={card.label} className="rounded-lg border-card-border border-[0.5px] bg-card p-5 shadow-sm">
           <p className="text-sm text-muted-foreground">{card.label}</p>
           <p className="mt-1 text-2xl font-semibold text-foreground">{card.value}</p>
           <p className="mt-1 text-xs text-muted-foreground">{card.secondary}</p>

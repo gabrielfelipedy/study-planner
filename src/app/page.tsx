@@ -94,7 +94,7 @@ export default async function Home({
 
                 {/* Today's progress section (preserved from existing) */}
                 {todayTotal > 0 ? (
-                  <div className="mb-6 rounded-lg border bg-card p-5 shadow-sm text-left">
+                  <div className="mb-6 rounded-lg border-card-border border-[0.5px] bg-card p-5 shadow-sm text-left">
                     <h2 className="text-sm font-medium text-foreground">
                       Today&apos;s progress
                     </h2>
@@ -183,18 +183,18 @@ export default async function Home({
 
                 {/* Chart grid — 2 columns on desktop, single on mobile */}
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                  <div className="rounded-lg border bg-card p-5 shadow-sm">
+                  <div className="rounded-lg border-card-border border-[0.5px] bg-card p-5 shadow-sm">
                     <CompletionOverTimeChart data={completionData} />
                   </div>
-                  <div className="rounded-lg border bg-card p-5 shadow-sm">
+                  <div className="rounded-lg border-card-border border-[0.5px] bg-card p-5 shadow-sm">
                     <SubjectDistributionChart data={subjectData} />
                   </div>
                   {selectedPlanId && (
-                    <div className="rounded-lg border bg-card p-5 shadow-sm">
+                    <div className="rounded-lg border-card-border border-[0.5px] bg-card p-5 shadow-sm">
                       <WeeklyTopicChart data={studyHoursData} />
                     </div>
                   )}
-                  <div className="rounded-lg border bg-card p-5 shadow-sm">
+                  <div className="rounded-lg border-card-border border-[0.5px] bg-card p-5 shadow-sm">
                     <RevisionAdherenceChart data={revisionData} />
                   </div>
                 </div>
@@ -217,7 +217,7 @@ export default async function Home({
                 </div>
                 {/* Show today's progress even without plans if there's data */}
                 {todayTotal > 0 && (
-                  <div className="mt-6 w-full max-w-md rounded-lg border bg-card p-5 shadow-sm text-left">
+                  <div className="mt-6 w-full max-w-md rounded-lg border-card-border border-[0.5px] bg-card p-5 shadow-sm text-left">
                     <h2 className="text-sm font-medium text-foreground">
                       Today&apos;s progress
                     </h2>
