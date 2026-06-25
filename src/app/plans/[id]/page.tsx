@@ -123,23 +123,27 @@ export default async function PlanDetailPage({
       <section className="mb-8">
         <h2 className="mb-3 text-lg font-medium text-foreground">Subjects</h2>
         {plan.subjects.length > 0 ? (
-          <div className="space-y-2">
+          <div className="flex flex-wrap gap-2">
             {plan.subjects.map((subject) => (
-              <div
+              <Badge
                 key={subject.id}
-                className="flex items-center gap-3 rounded-md border bg-card px-4 py-3"
+                variant="outline"
+                className="gap-1.5 px-3 py-1.5"
+                style={
+                  subject.color
+                    ? { borderColor: subject.color, color: subject.color }
+                    : undefined
+                }
               >
                 <div
-                  className="h-3 w-3 rounded-full"
+                  className="h-2 w-2 rounded-full"
                   style={{ backgroundColor: subject.color ?? "#3b82f6" }}
                 />
-                <span className="flex-1 text-sm font-medium text-foreground">
-                  {subject.name}
+                {subject.name}
+                <span className="text-xs opacity-60">
+                  {subject.topicCount}
                 </span>
-                <span className="text-xs text-muted-foreground">
-                  {subject.topicCount} topic{subject.topicCount === 1 ? "" : "s"}
-                </span>
-              </div>
+              </Badge>
             ))}
           </div>
         ) : (
