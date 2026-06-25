@@ -1,6 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { inArray, sql } from "drizzle-orm";
+import { db } from "@/lib/db/client";
+import { planTopics } from "@/lib/db/schema";
 import {
   createSubject as dalCreateSubject,
   updateSubject as dalUpdateSubject,
@@ -28,7 +31,23 @@ export async function updateSubject(
 }
 
 export async function createTopics(subjectId: string, titles: string[]) {
-  return dalCreateTopics(subjectId, titles);
+  const { ids, planIds } = await dalCreateTopics(subjectId, titles);
+  for (const planId of planIds) {
+    revalidatePath(`/plans/${planId}`);
+  }
+  revalidatePath(`/subjects/[id]`, "page");
+  return { ids };
+}
+
+export async function checkTopicsInPlans(
+  topicIds: string[]
+): Promise<number> {
+  const result = await db
+    .select({ count: sql<number>`count(distinct ${planTopics.planId})` })
+    .from(planTopics)
+    .where(inArray(planTopics.topicId, topicIds))
+    .get();
+  return result?.count ?? 0;
 }
 
 export async function deleteTopics(topicIds: string[]) {

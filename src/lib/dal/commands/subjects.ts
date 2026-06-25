@@ -97,8 +97,8 @@ export async function createTopic(input: CreateTopicInput): Promise<{ id: string
 export async function createTopics(
   subjectId: string,
   titles: string[]
-): Promise<{ ids: string[] }> {
-  if (titles.length === 0) return { ids: [] };
+): Promise<{ ids: string[]; planIds: string[] }> {
+  if (titles.length === 0) return { ids: [], planIds: [] };
 
   const maxOrder = await db
     .select({ max: sql<number>`max(${topics.sortOrder})` })
@@ -115,7 +115,16 @@ export async function createTopics(
   }));
 
   await db.insert(topics).values(values);
-  return { ids: values.map((v) => v.id) };
+
+  const planRows = await db
+    .select({ planId: planTopics.planId })
+    .from(planTopics)
+    .innerJoin(topics, eq(topics.id, planTopics.topicId))
+    .where(eq(topics.subjectId, subjectId))
+    .all();
+  const planIds = [...new Set(planRows.map((r) => r.planId))];
+
+  return { ids: values.map((v) => v.id), planIds };
 }
 
 export async function updateTopic(

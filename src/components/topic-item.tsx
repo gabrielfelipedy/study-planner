@@ -1,12 +1,14 @@
 "use client";
 
 import { InlineEdit } from "./inline-edit";
+import { Trash2 } from "lucide-react";
 
 type TopicItemProps = {
   topic: { id: string; title: string; sortOrder: number };
   isSelected: boolean;
   onToggleSelect: (id: string) => void;
   onRename: (topicId: string, title: string) => Promise<void>;
+  onDelete?: (topicId: string) => void;
   onDragStart: (e: React.DragEvent, index: number) => void;
   onDragOver: (e: React.DragEvent, index: number) => void;
   onDrop: (e: React.DragEvent, index: number) => void;
@@ -18,6 +20,7 @@ export function TopicItem({
   isSelected,
   onToggleSelect,
   onRename,
+  onDelete,
   onDragStart,
   onDragOver,
   onDrop,
@@ -29,7 +32,7 @@ export function TopicItem({
       onDragStart={(e) => onDragStart(e, topic.sortOrder)}
       onDragOver={(e) => onDragOver(e, topic.sortOrder)}
       onDrop={(e) => onDrop(e, topic.sortOrder)}
-      className={`flex items-center gap-3 rounded-md border bg-card px-4 py-2.5 transition ${
+      className={`group flex items-center gap-3 rounded-md border bg-card px-4 py-2.5 transition ${
         isSelected ? "border-primary bg-accent" : "border-border"
       } ${!selectMode ? "cursor-grab active:cursor-grabbing" : ""}`}
     >
@@ -54,6 +57,17 @@ export function TopicItem({
           onSave={(title) => onRename(topic.id, title)}
         />
       </div>
+
+      {!selectMode && onDelete && (
+        <button
+          type="button"
+          onClick={() => onDelete(topic.id)}
+          className="shrink-0 text-muted-foreground opacity-0 transition hover:text-destructive group-hover:opacity-100"
+          title="Delete topic"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+      )}
     </div>
   );
 }

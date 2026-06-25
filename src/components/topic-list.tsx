@@ -3,8 +3,22 @@
 import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { TopicItem } from "./topic-item";
-import { createTopics, deleteTopics, reorderTopics, updateTopic } from "@/lib/actions/subjects";
+import {
+  createTopics,
+  deleteTopics,
+  checkTopicsInPlans,
+  reorderTopics,
+  updateTopic,
+} from "@/lib/actions/subjects";
 
 type TopicListProps = {
   subjectId: string;
@@ -24,6 +38,10 @@ export function TopicList({ subjectId, initialTopics, userId }: TopicListProps) 
   const [bulkText, setBulkText] = useState("");
   const [adding, setAdding] = useState(false);
   const [bulkError, setBulkError] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{
+    ids: string[];
+    planCount: number;
+  } | null>(null);
 
   const bulkLines = bulkText
     .split("\n")
@@ -77,13 +95,35 @@ export function TopicList({ subjectId, initialTopics, userId }: TopicListProps) 
     });
   }, []);
 
-  const handleBatchDelete = useCallback(async () => {
-    if (selectedIds.size === 0) return;
-    await deleteTopics(Array.from(selectedIds));
-    setTopics((prev) => prev.filter((t) => !selectedIds.has(t.id)));
+  const executeDelete = useCallback(async (ids: string[]) => {
+    await deleteTopics(ids);
+    setTopics((prev) => prev.filter((t) => !ids.includes(t.id)));
     setSelectedIds(new Set());
     setSelectMode(false);
-  }, [selectedIds]);
+  }, []);
+
+  const handleBatchDelete = useCallback(async () => {
+    if (selectedIds.size === 0) return;
+    const ids = Array.from(selectedIds);
+    const planCount = await checkTopicsInPlans(ids);
+    if (planCount > 0) {
+      setPendingDelete({ ids, planCount });
+    } else {
+      await executeDelete(ids);
+    }
+  }, [selectedIds, executeDelete]);
+
+  const handleSingleDelete = useCallback(
+    async (topicId: string) => {
+      const planCount = await checkTopicsInPlans([topicId]);
+      if (planCount > 0) {
+        setPendingDelete({ ids: [topicId], planCount });
+      } else {
+        await executeDelete([topicId]);
+      }
+    },
+    [executeDelete]
+  );
 
   const [dragIndex, setDragIndex] = useState<number | null>(null);
 
@@ -160,6 +200,7 @@ export function TopicList({ subjectId, initialTopics, userId }: TopicListProps) 
               isSelected={selectedIds.has(topic.id)}
               onToggleSelect={toggleSelect}
               onRename={handleRename}
+              onDelete={handleSingleDelete}
               onDragStart={handleDragStart}
               onDragOver={handleDragOver}
               onDrop={handleDrop}
@@ -201,6 +242,38 @@ export function TopicList({ subjectId, initialTopics, userId }: TopicListProps) 
           </Button>
         </div>
       </div>
+
+      <Dialog
+        open={pendingDelete !== null}
+        onOpenChange={(v) => { if (!v) setPendingDelete(null); }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete topic{pendingDelete && pendingDelete.ids.length > 1 ? "s" : ""}?</DialogTitle>
+            <DialogDescription>
+              {pendingDelete && pendingDelete.ids.length === 1
+                ? `This topic is present in ${pendingDelete.planCount} plan${pendingDelete.planCount === 1 ? "" : "s"}. Delete it?`
+                : `${pendingDelete?.ids.length} topics are present in ${pendingDelete?.planCount} plan${pendingDelete?.planCount === 1 ? "" : "s"}. Delete them?`}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPendingDelete(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={async () => {
+                if (!pendingDelete) return;
+                const { ids } = pendingDelete;
+                setPendingDelete(null);
+                await executeDelete(ids);
+              }}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
