@@ -13,7 +13,6 @@ import { getScheduleSlots } from "@/lib/dal/queries/calendar";
 import { ArchiveDialog } from "@/components/archive-dialog";
 import { ScheduleGenerator } from "@/components/schedule-generator";
 import { ScheduleWithDialogs } from "@/components/schedule-with-dialogs";
-import { WeekdayToggle } from "@/components/weekday-toggle";
 import { RegenerateButton } from "@/components/regenerate-button";
 
 export default async function PlanDetailPage({
@@ -111,13 +110,6 @@ export default async function PlanDetailPage({
             </div>
           )}
         </div>
-      </div>
-
-      <div className="mb-6">
-        <WeekdayToggle
-          planId={id}
-          weekdays={plan.weekdays ? plan.weekdays.split(",").map(Number) : [1, 2, 3, 4, 5]}
-        />
       </div>
 
       <section className="mb-8">
