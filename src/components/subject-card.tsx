@@ -6,7 +6,7 @@ export function SubjectCard({ subject }: { subject: SubjectSummary }) {
   return (
     <Link
       href={`/subjects/${subject.id}`}
-      className="group block rounded-lg border bg-card p-5 shadow-sm transition hover:shadow-md"
+      className="group block rounded-lg border-card-border border-[0.5px] bg-card p-5 shadow-sm transition hover:shadow-md"
     >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">

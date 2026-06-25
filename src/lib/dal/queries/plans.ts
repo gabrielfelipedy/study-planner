@@ -10,9 +10,13 @@ export type PlanSummary = {
   status: string | null;
   totalTopics: number | null;
   completedTopics: number | null;
+  subjects: Array<{
+    name: string;
+    color: string | null;
+  }>;
 };
 
-export type PlanWithSubjects = PlanSummary & {
+export type PlanWithSubjects = Omit<PlanSummary, 'subjects'> & {
   startDate: string;
   weekdays: string;
   createdAt: string;
@@ -31,7 +35,7 @@ export type PlanWithSubjects = PlanSummary & {
 };
 
 export const getPlansForUser = cache(async (userId: string): Promise<PlanSummary[]> => {
-  return db
+  const plans = await db
     .select({
       id: studyPlans.id,
       title: studyPlans.title,
@@ -49,6 +53,37 @@ export const getPlansForUser = cache(async (userId: string): Promise<PlanSummary
     )
     .orderBy(studyPlans.createdAt)
     .all();
+
+  if (plans.length === 0) return [];
+
+  const planSubjects = await db
+    .select({
+      planId: planTopics.planId,
+      name: subjects.name,
+      color: subjects.color,
+    })
+    .from(planTopics)
+    .innerJoin(topics, eq(topics.id, planTopics.topicId))
+    .innerJoin(subjects, eq(subjects.id, topics.subjectId))
+    .where(inArray(planTopics.planId, plans.map((p) => p.id)))
+    .all();
+
+  const grouped = new Map<string, Map<string, { name: string; color: string | null }>>();
+  for (const row of planSubjects) {
+    let subjectsForPlan = grouped.get(row.planId);
+    if (!subjectsForPlan) {
+      subjectsForPlan = new Map();
+      grouped.set(row.planId, subjectsForPlan);
+    }
+    if (!subjectsForPlan.has(row.name)) {
+      subjectsForPlan.set(row.name, { name: row.name, color: row.color });
+    }
+  }
+
+  return plans.map((plan) => ({
+    ...plan,
+    subjects: Array.from(grouped.get(plan.id)?.values() ?? []),
+  }));
 });
 
 export const getPlanById = cache(async (planId: string, userId: string): Promise<PlanWithSubjects | null> => {

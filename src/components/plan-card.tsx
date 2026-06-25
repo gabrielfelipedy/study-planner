@@ -12,7 +12,7 @@ export function PlanCard({ plan }: { plan: PlanSummary }) {
   return (
     <Link
       href={`/plans/${plan.id}`}
-      className="group block rounded-lg border bg-card p-5 shadow-sm transition hover:shadow-md"
+      className="group block rounded-lg border-card-border border-[0.5px] bg-card p-5 shadow-sm transition hover:shadow-md"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
@@ -31,6 +31,24 @@ export function PlanCard({ plan }: { plan: PlanSummary }) {
           )}
         </div>
       </div>
+      {plan.subjects.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {plan.subjects.map((subject) => (
+            <Badge
+              key={subject.name}
+              variant="outline"
+              className="text-xs"
+              style={
+                subject.color
+                  ? { borderColor: subject.color, color: subject.color }
+                  : undefined
+              }
+            >
+              {subject.name}
+            </Badge>
+          ))}
+        </div>
+      )}
     </Link>
   );
 }
