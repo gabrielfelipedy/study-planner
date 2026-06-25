@@ -112,18 +112,17 @@ export default async function PlanDetailPage({
             {plan.subjects.map((subject) => (
               <Badge
                 key={subject.id}
-                variant="outline"
-                className="gap-1.5 px-3 py-1.5"
+                className="gap-1.5 px-3 py-1.5 border-0 text-white"
                 style={
                   subject.color
-                    ? { borderColor: subject.color, color: subject.color }
+                    ? {
+                        backgroundColor: subject.color,
+                        backgroundImage:
+                          "linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4))",
+                      }
                     : undefined
                 }
               >
-                <div
-                  className="h-2 w-2 rounded-full"
-                  style={{ backgroundColor: subject.color ?? "#3b82f6" }}
-                />
                 {subject.name}
                 <span className="text-xs opacity-60">
                   {subject.topicCount}

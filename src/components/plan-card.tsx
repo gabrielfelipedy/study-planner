@@ -36,11 +36,14 @@ export function PlanCard({ plan }: { plan: PlanSummary }) {
           {plan.subjects.map((subject) => (
             <Badge
               key={subject.name}
-              variant="outline"
-              className="text-xs"
+              className="border-0 text-xs text-white"
               style={
                 subject.color
-                  ? { borderColor: subject.color, color: subject.color }
+                  ? {
+                      backgroundColor: subject.color,
+                      backgroundImage:
+                        "linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4))",
+                    }
                   : undefined
               }
             >
