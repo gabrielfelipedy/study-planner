@@ -5,7 +5,6 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight } from "lucide-react";
 import { differenceInDays } from "date-fns";
 import { getPlanById, getPlanTopicSyncStatuses } from "@/lib/dal/queries/plans";
 import { syncSubjectTopicsAction } from "./actions";
@@ -61,12 +60,6 @@ export default async function PlanDetailPage({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Link href={`/plans/${id}/study`}>
-              <Button size="sm" className="gap-1.5">
-                Study session
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
             <RegenerateButton planId={id} />
             <Link href={`/plans/${id}/edit`}>
               <Button variant="outline" size="sm">Edit</Button>
