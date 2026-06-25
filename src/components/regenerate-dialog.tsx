@@ -62,17 +62,17 @@ export function RegenerateDialog({
             {warning}
           </div>
         )}
-        <DialogFooter className="flex gap-2">
+        <DialogFooter className="sm:justify-stretch">
           {warning ? (
             <Button variant="outline" onClick={() => { onClearWarning(); onOpenChange(false); }}>
               Close
             </Button>
           ) : (
             <>
-              <Button variant="outline" onClick={() => { onOpenChange(false); onCancel(); }} disabled={saving}>
+              <Button variant="outline" className="flex-1" onClick={() => { onOpenChange(false); onCancel(); }} disabled={saving}>
                 Cancel
               </Button>
-              <Button variant="destructive" onClick={handleRegenerate} disabled={saving}>
+              <Button variant="destructive" className="flex-1" onClick={handleRegenerate} disabled={saving}>
                 {saving ? "Generating…" : "Regenerate"}
               </Button>
             </>
