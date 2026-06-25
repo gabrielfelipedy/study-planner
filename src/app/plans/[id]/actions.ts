@@ -19,6 +19,7 @@ import { getCurrentRevisionState } from "@/lib/dal/queries/revisions";
 export type GenerateResult = {
   success: boolean;
   message?: string;
+  warning?: string;
 };
 
 export type MoveSlotInput = {
@@ -152,7 +153,10 @@ export async function regenerateScheduleAction(
   }
 
   try {
-    await adaptSchedule({ planId, userId: session.user.id });
+    const result = await adaptSchedule({ planId, userId: session.user.id });
+    if (result.warning) {
+      return { success: true, warning: result.warning };
+    }
     revalidatePath(`/plans/${planId}`);
     return { success: true };
   } catch (error) {
@@ -312,15 +316,18 @@ export async function updateWeekdaysAction(
   }
 
   try {
-    await updatePlan(planId, session.user.id, {
-      weekdays: weekdays.join(","),
-    });
-
-    await adaptSchedule({
+    const schedule = await adaptSchedule({
       planId,
       userId: session.user.id,
-      startDateOverride: plan.startDate,
       weekdaysOverride: weekdays.join(","),
+    });
+
+    if (schedule.warning) {
+      return { success: true, warning: schedule.warning };
+    }
+
+    await updatePlan(planId, session.user.id, {
+      weekdays: weekdays.join(","),
     });
 
     revalidatePath(`/plans/${planId}`);

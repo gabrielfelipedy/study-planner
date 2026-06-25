@@ -13,10 +13,17 @@ type RegenerateButtonProps = {
 export function RegenerateButton({ planId }: RegenerateButtonProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [warning, setWarning] = useState<string | null>(null);
 
   async function handleRegenerate() {
     const result = await regenerateScheduleAction(planId);
     if (!result.success) throw new Error(result.message);
+    if (result.warning) {
+      setWarning(result.warning);
+      return;
+    }
+    setWarning(null);
+    setOpen(false);
     router.refresh();
   }
 
@@ -28,9 +35,11 @@ export function RegenerateButton({ planId }: RegenerateButtonProps) {
       <RegenerateDialog
         planId={planId}
         open={open}
+        warning={warning}
         onOpenChange={setOpen}
         onRegenerate={handleRegenerate}
-        onCancel={() => setOpen(false)}
+        onCancel={() => { setOpen(false); setWarning(null); }}
+        onClearWarning={() => setWarning(null)}
       />
     </>
   );

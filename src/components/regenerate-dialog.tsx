@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,18 +15,21 @@ type RegenerateDialogProps = {
   planId: string;
   onRegenerate: () => Promise<void>;
   onCancel: () => void;
+  onClearWarning: () => void;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  warning: string | null;
 };
 
 export function RegenerateDialog({
   planId: _planId,
   onRegenerate,
   onCancel,
+  onClearWarning,
   open,
   onOpenChange,
+  warning,
 }: RegenerateDialogProps) {
-  const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,8 +38,6 @@ export function RegenerateDialog({
     setError(null);
     try {
       await onRegenerate();
-      onOpenChange(false);
-      router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to regenerate");
     } finally {
@@ -46,7 +46,7 @@ export function RegenerateDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) onCancel(); onOpenChange(v); }}>
+    <Dialog open={open} onOpenChange={(v) => { if (!v) { onCancel(); onClearWarning(); } onOpenChange(v); }}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Regenerate schedule?</DialogTitle>
@@ -57,13 +57,26 @@ export function RegenerateDialog({
         {error && (
           <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
         )}
+        {warning && (
+          <div className="rounded-md bg-amber-950/30 p-3 text-sm text-amber-400" role="alert">
+            {warning}
+          </div>
+        )}
         <DialogFooter className="flex gap-2">
-          <Button variant="outline" onClick={() => { onOpenChange(false); onCancel(); }} disabled={saving}>
-            Cancel
-          </Button>
-          <Button variant="destructive" onClick={handleRegenerate} disabled={saving}>
-            {saving ? "Generating…" : "Regenerate"}
-          </Button>
+          {warning ? (
+            <Button variant="outline" onClick={() => { onClearWarning(); onOpenChange(false); }}>
+              Close
+            </Button>
+          ) : (
+            <>
+              <Button variant="outline" onClick={() => { onOpenChange(false); onCancel(); }} disabled={saving}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleRegenerate} disabled={saving}>
+                {saving ? "Generating…" : "Regenerate"}
+              </Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

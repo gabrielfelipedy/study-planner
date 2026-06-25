@@ -38,7 +38,7 @@ describe("generateSchedule", () => {
     expect(result.slots.length).toBe(1);
   });
 
-  it("handles more topics than days", async () => {
+  it("handles more topics than days — even spread", async () => {
     const topics = Array.from({ length: 14 }, (_, i) => ({
       id: `t${i}`,
       title: `Topic ${i}`,
@@ -50,12 +50,11 @@ describe("generateSchedule", () => {
       deadline: "2026-01-06", // 2 days
     });
     expect(result.slots.length).toBe(14);
-    const uniqueDates = [...new Set(result.slots.map((s) => s.date))];
-    expect(uniqueDates.length).toBe(2);
-    for (const date of uniqueDates) {
-      const count = result.slots.filter((s) => s.date === date).length;
-      expect(count).toBeGreaterThanOrEqual(6);
-    }
+    const dateCounts = Object.values(
+      Object.groupBy(result.slots, (s) => s.date)
+    ).map((a) => a!.length);
+    // 14 topics over 2 days → 7 per day (perfectly even)
+    expect(Math.max(...dateCounts) - Math.min(...dateCounts)).toBeLessThanOrEqual(1);
   });
 
   it("returns empty slots for no topics", async () => {
@@ -122,8 +121,7 @@ describe("generateSchedule", () => {
     });
 
     it("distributes across fewer available days with weekday filter", async () => {
-      // 6 topics, Mon-Fri only over a 7-day window = 5 study days
-      // ceil(6/5) = 2 per day for first 3 days
+      // 6 topics, 5 study days (Mon-Fri): d1=2, d2=1, d3=1, d4=1, d5=1
       const topics = Array.from({ length: 6 }, (_, i) => ({
         id: `t${i}`,
         title: `Topic ${i}`,
@@ -135,9 +133,10 @@ describe("generateSchedule", () => {
         deadline: "2026-01-11", // Sunday
         weekdays: [1, 2, 3, 4, 5], // Mon-Fri
       });
+
       expect(result.slots.length).toBe(6);
       const dates = [...new Set(result.slots.map((s) => s.date))];
-      expect(dates.length).toBe(3); // 6 topics, 2 per day = 3 days
+      expect(dates.length).toBe(5); // All 5 study days used, none left empty
       // All dates should be weekdays
       for (const date of dates) {
         const day = isoDay(date);
@@ -154,6 +153,175 @@ describe("generateSchedule", () => {
       expect(result.slots.length).toBe(3);
       const dates = [...new Set(result.slots.map((s) => s.date))];
       expect(dates.length).toBe(3);
+    });
+  });
+
+  describe("distribution fairness", () => {
+    it("N > M: extra topic goes to earliest day (N = M + 1)", async () => {
+      const topics = Array.from({ length: 6 }, (_, i) => ({
+        id: `t${i}`,
+        title: `Topic ${i}`,
+      }));
+      const result = await generateSchedule({
+        ...baseInput,
+        topics,
+        weekdays: [1, 2, 3, 4, 5],
+      });
+
+      expect(result.slots.length).toBe(6);
+      const countByDate = Object.fromEntries(
+        Object.entries(Object.groupBy(result.slots, (s) => s.date))
+          .map(([d, slots]) => [d, slots!.length])
+      );
+
+      // d1=2, d2=1, d3=1, d4=1, d5=1
+      expect(countByDate["2026-01-05"]).toBe(2);
+      expect(countByDate["2026-01-06"]).toBe(1);
+      expect(countByDate["2026-01-07"]).toBe(1);
+      expect(countByDate["2026-01-08"]).toBe(1);
+      expect(countByDate["2026-01-09"]).toBe(1);
+    });
+
+    it("round-robin continues filling earliest day first when all days have 1", async () => {
+      const topics = Array.from({ length: 7 }, (_, i) => ({
+        id: `t${i}`,
+        title: `Topic ${i}`,
+      }));
+      const result = await generateSchedule({
+        ...baseInput,
+        topics,
+        weekdays: [1, 2, 3, 4, 5],
+      });
+
+      expect(result.slots.length).toBe(7);
+      const countByDate = Object.fromEntries(
+        Object.entries(Object.groupBy(result.slots, (s) => s.date))
+          .map(([d, slots]) => [d, slots!.length])
+      );
+
+      // d1=2, d2=2, d3=1, d4=1, d5=1
+      expect(countByDate["2026-01-05"]).toBe(2);
+      expect(countByDate["2026-01-06"]).toBe(2);
+      expect(countByDate["2026-01-07"]).toBe(1);
+      expect(countByDate["2026-01-08"]).toBe(1);
+      expect(countByDate["2026-01-09"]).toBe(1);
+    });
+
+    it("exact multiple — topics divide evenly across days", async () => {
+      const topics = Array.from({ length: 10 }, (_, i) => ({
+        id: `t${i}`,
+        title: `Topic ${i}`,
+      }));
+      const result = await generateSchedule({
+        ...baseInput,
+        topics,
+        weekdays: [1, 2, 3, 4, 5],
+      });
+
+      expect(result.slots.length).toBe(10);
+      const countByDate = Object.fromEntries(
+        Object.entries(Object.groupBy(result.slots, (s) => s.date))
+          .map(([d, slots]) => [d, slots!.length])
+      );
+
+      // 10 topics over 5 days = 2 per day
+      for (const date of ["2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09"]) {
+        expect(countByDate[date]).toBe(2);
+      }
+    });
+
+    it("equal number of topics and days — exactly 1 per day", async () => {
+      const topics = Array.from({ length: 5 }, (_, i) => ({
+        id: `t${i}`,
+        title: `Topic ${i}`,
+      }));
+      const result = await generateSchedule({
+        ...baseInput,
+        topics,
+        weekdays: [1, 2, 3, 4, 5],
+      });
+
+      expect(result.slots.length).toBe(5);
+      const countByDate = Object.fromEntries(
+        Object.entries(Object.groupBy(result.slots, (s) => s.date))
+          .map(([d, slots]) => [d, slots!.length])
+      );
+
+      for (const date of ["2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09"]) {
+        expect(countByDate[date]).toBe(1);
+      }
+    });
+
+    it("single available day — all topics on same date", async () => {
+      const topics = Array.from({ length: 5 }, (_, i) => ({
+        id: `t${i}`,
+        title: `Topic ${i}`,
+      }));
+      const result = await generateSchedule({
+        ...baseInput,
+        topics,
+        weekdays: [1],
+      });
+
+      expect(result.slots.length).toBe(5);
+      expect(result.slots.every((s) => s.date === "2026-01-05")).toBe(true);
+    });
+
+    it("existingCountsByDate — respects pre-existing load, fills emptiest days first", async () => {
+      const topics = Array.from({ length: 3 }, (_, i) => ({
+        id: `t${i}`,
+        title: `Topic ${i}`,
+      }));
+      const result = await generateSchedule({
+        ...baseInput,
+        topics,
+        startDate: "2026-01-05",
+        deadline: "2026-01-06",
+        weekdays: [1, 2],
+        existingCountsByDate: {
+          "2026-01-05": 2, // Mon already has 2 slots
+        },
+      });
+
+      // 3 new topics distributed: 1 goes to Mon (tiebreak), 2 to Tue (emptiest)
+      expect(result.slots.length).toBe(3);
+      const countByDate = Object.fromEntries(
+        Object.entries(Object.groupBy(result.slots, (s) => s.date))
+          .map(([d, slots]) => [d, slots!.length])
+      );
+      expect(countByDate["2026-01-05"]).toBe(1);
+      expect(countByDate["2026-01-06"]).toBe(2);
+    });
+
+    it("existingCountsByDate — balances large pre-existing imbalance", async () => {
+      // 4 new topics, 3 days with pre-load: d1=3, d2=2, d3=0
+      // expected new distribution: d1=0, d2=1, d3=3
+      // final totals: d1=3, d2=3, d3=3
+      const topics = Array.from({ length: 4 }, (_, i) => ({
+        id: `t${i}`,
+        title: `Topic ${i}`,
+      }));
+      const result = await generateSchedule({
+        ...baseInput,
+        topics,
+        startDate: "2026-01-05",
+        deadline: "2026-01-07",
+        weekdays: [1, 2, 3],
+        existingCountsByDate: {
+          "2026-01-05": 3,
+          "2026-01-06": 2,
+          "2026-01-07": 0,
+        },
+      });
+
+      expect(result.slots.length).toBe(4);
+      const countByDate = Object.fromEntries(
+        Object.entries(Object.groupBy(result.slots, (s) => s.date))
+          .map(([d, slots]) => [d, slots!.length])
+      );
+      expect(countByDate["2026-01-05"]).toBeUndefined();
+      expect(countByDate["2026-01-06"]).toBe(1);
+      expect(countByDate["2026-01-07"]).toBe(3);
     });
   });
 });

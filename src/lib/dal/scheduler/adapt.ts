@@ -1,16 +1,16 @@
 /**
  * Adaptive rescheduling — replans remaining topics based on actual progress.
  *
- * Preserves isManual=true slots during regeneration.
+ * Past uncompleted topics (both manual and auto) are redistributed.
+ * Future isManual=true slots and completed slots are preserved.
  * Reuses distribute.ts even-spread with startDate = today.
- * Missed past topics are auto-redistributed alongside pending topics.
  * Revision slots are preserved untouched.
  */
 
 import { db } from "@/lib/db/client";
 import { scheduleSlots, studyPlans } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { format, differenceInDays } from "date-fns";
+import { format } from "date-fns";
 import { generateSchedule } from "@/lib/dal/scheduler/distribute";
 import { getTopicsForPlan } from "@/lib/dal/queries/plans";
 
@@ -21,7 +21,9 @@ export type AdaptInput = {
   weekdaysOverride?: string;
 };
 
-export async function adaptSchedule(input: AdaptInput): Promise<void> {
+export async function adaptSchedule(
+  input: AdaptInput
+): Promise<{ warning?: string }> {
   const { planId } = input;
 
   const plan = await db
@@ -35,7 +37,12 @@ export async function adaptSchedule(input: AdaptInput): Promise<void> {
 
   const today = format(new Date(), "yyyy-MM-dd");
   const deadline = plan.deadline;
-  const effectiveStart = input.startDateOverride ?? (today > deadline ? deadline : today);
+
+  if (today > deadline) {
+    return { warning: "Deadline has ended. Cannot modify schedule." };
+  }
+
+  const effectiveStart = input.startDateOverride ?? today;
 
   const allSlots = await db
     .select()
@@ -55,7 +62,7 @@ export async function adaptSchedule(input: AdaptInput): Promise<void> {
   ];
 
   if (pendingTopicIds.length === 0) {
-    return;
+    return {};
   }
 
   const allPlanTopics = await getTopicsForPlan(planId);
@@ -64,7 +71,7 @@ export async function adaptSchedule(input: AdaptInput): Promise<void> {
   );
 
   if (topicsToRedistribute.length === 0) {
-    return;
+    return {};
   }
 
   const weekdaysStr = input.weekdaysOverride ?? plan.weekdays;
@@ -88,6 +95,10 @@ export async function adaptSchedule(input: AdaptInput): Promise<void> {
     weekdays,
     existingCountsByDate: retainedCounts,
   });
+
+  if (result.slots.length === 0) {
+    return { warning: "No remaining study days available for rescheduling." };
+  }
 
   await db.transaction(async (tx) => {
     for (const slot of pastPendingSlots) {
@@ -115,27 +126,8 @@ export async function adaptSchedule(input: AdaptInput): Promise<void> {
       })
       .where(eq(studyPlans.id, planId));
   });
+
+  return {};
 }
 
-export async function needsAdaptation(planId: string): Promise<boolean> {
-  const plan = await db
-    .select({
-      startDate: studyPlans.startDate,
-      deadline: studyPlans.deadline,
-      totalTopics: studyPlans.totalTopics,
-      completedTopics: studyPlans.completedTopics,
-    })
-    .from(studyPlans)
-    .where(eq(studyPlans.id, planId))
-    .get();
 
-  if (!plan || !plan.totalTopics || !plan.startDate || !plan.deadline) return false;
-
-  const today = format(new Date(), "yyyy-MM-dd");
-  const totalDays = differenceInDays(plan.deadline, plan.startDate) + 1;
-  const daysElapsed = differenceInDays(today, plan.startDate) + 1;
-  const expectedCompletions = Math.round((daysElapsed / totalDays) * plan.totalTopics);
-  const behindBy = Math.max(0, expectedCompletions - (plan.completedTopics ?? 0));
-
-  return behindBy > Math.max(1, Math.round(plan.totalTopics * 0.2));
-}

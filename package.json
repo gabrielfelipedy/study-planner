@@ -10,6 +10,8 @@
     "type-check": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "test": "vitest --config tests/vitest.config.ts",
+    "test:run": "vitest run --config tests/vitest.config.ts",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
