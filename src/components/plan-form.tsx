@@ -36,6 +36,7 @@ type PlanFormProps = {
 export function PlanForm({ mode, userId, subjects, initialData }: PlanFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [toastKey, setToastKey] = useState(0);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(
     new Set(initialData?.selectedSubjectIds ?? [])
@@ -53,6 +54,8 @@ export function PlanForm({ mode, userId, subjects, initialData }: PlanFormProps)
   );
 
   function toggleSubject(id: string) {
+    const subject = subjects.find((s) => s.id === id);
+    if (subject?.topicCount === 0) return;
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
@@ -69,6 +72,7 @@ export function PlanForm({ mode, userId, subjects, initialData }: PlanFormProps)
 
   async function handleSubmit(formData: FormData) {
     setError(null);
+    setInfo(null);
 
     const title = formData.get("title") as string;
     const deadline = formData.get("deadline") as string;
@@ -77,7 +81,22 @@ export function PlanForm({ mode, userId, subjects, initialData }: PlanFormProps)
     if (!title?.trim()) { setError("Plan title is required"); return; }
     if (!deadline) { setError("Deadline is required"); return; }
     if (!startDate) { setError("Start date is required"); return; }
-    if (selectedIds.size === 0) { setError("Select at least one subject"); return; }
+
+    if (mode === "edit" && initialData) {
+      const hasChanges =
+        title.trim() !== initialData.title ||
+        deadline !== initialData.deadline ||
+        startDate !== initialData.startDate ||
+        weekdays.join(",") !== (initialData.weekdays ?? []).join(",") ||
+        selectedIds.size !== initialData.selectedSubjectIds.length ||
+        !initialData.selectedSubjectIds.every((id) => selectedIds.has(id));
+
+      if (!hasChanges) {
+        setInfo("No changes detected — nothing to save");
+        setTimeout(() => router.push(`/plans/${initialData.id}`), 1500);
+        return;
+      }
+    }
 
     try {
       if (mode === "create") {
@@ -127,6 +146,9 @@ export function PlanForm({ mode, userId, subjects, initialData }: PlanFormProps)
     <form action={handleSubmit} className="space-y-6">
       {error && (
         <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
+      )}
+      {info && (
+        <div className="rounded-md bg-blue-500/10 p-3 text-sm text-blue-500">{info}</div>
       )}
 
       <div className="space-y-2">
@@ -202,10 +224,12 @@ export function PlanForm({ mode, userId, subjects, initialData }: PlanFormProps)
             {subjects.map((subject) => (
               <label
                 key={subject.id}
-                className="flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 hover:bg-muted/50"
+                className={`flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 hover:bg-muted/50 ${subject.topicCount === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
+                title={subject.topicCount === 0 ? "Add topics first to include this subject" : undefined}
               >
                 <Checkbox
                   checked={selectedIds.has(subject.id)}
+                  disabled={subject.topicCount === 0}
                   onCheckedChange={() => toggleSubject(subject.id)}
                 />
                 <div
@@ -216,7 +240,7 @@ export function PlanForm({ mode, userId, subjects, initialData }: PlanFormProps)
                   {subject.name}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  {subject.topicCount} topic{subject.topicCount === 1 ? "" : "s"}
+                  {subject.topicCount === 0 ? "No topics" : `${subject.topicCount} topic${subject.topicCount === 1 ? "" : "s"}`}
                 </span>
               </label>
             ))}
@@ -224,9 +248,19 @@ export function PlanForm({ mode, userId, subjects, initialData }: PlanFormProps)
         )}
       </div>
 
-      <Button type="submit" className="w-full" disabled={subjects.length === 0}>
-        {mode === "create" ? "Create plan" : "Save changes"}
-      </Button>
+      <div className="flex gap-2">
+        <Button type="submit" className="flex-1">
+          {mode === "create" ? "Create plan" : "Save changes"}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          className="flex-1"
+          onClick={() => router.push(mode === "create" ? "/plans" : `/plans/${initialData!.id}`)}
+        >
+          Cancel
+        </Button>
+      </div>
 
       <CompletionToast
         message={mode === "create" ? "Plan created! ✓" : "Changes saved! ✓"}
